@@ -2,6 +2,67 @@
 
 A Flutter-based e-commerce application connecting consumers with fresh, organic produce from local farms, powered by Firebase for authentication and real-time data storage.
 
+## Flutter Environment Setup and First App Run
+
+### Steps Followed
+
+#### 1. Install Flutter SDK
+- Downloaded Flutter SDK from the [official site](https://docs.flutter.dev/get-started/install)
+- Extracted to `C:/src/flutter`
+- Added `flutter/bin` to system PATH
+- Verified installation with:
+
+```bash
+flutter doctor
+```
+
+#### 2. Set Up Android Studio (or VS Code)
+- Installed Android Studio
+- Installed Flutter and Dart plugins
+- Installed Android SDK, Platform Tools, and AVD Manager
+- Alternatively, installed Flutter and Dart extensions in VS Code
+
+#### 3. Configure Emulator
+- Opened AVD Manager in Android Studio
+- Created a Pixel 6 emulator with Android 13
+- Launched emulator and verified with:
+
+```bash
+flutter devices
+```
+
+#### 4. Create and Run First Flutter App
+- Ran:
+
+```bash
+flutter create first_flutter_app
+cd first_flutter_app
+flutter run
+```
+- Saw the default Flutter counter app on the emulator
+
+#### 5. Setup Verification
+
+##### Flutter Doctor Output
+![Flutter Doctor Output](screenshots/flutter_doctor.png)
+
+##### Running App on Emulator
+![Running App](screenshots/flutter_emulator.png)
+
+### Reflection
+
+**Challenges:**
+- Understanding PATH setup and environment variables
+- Downloading and configuring Android SDK/AVD
+- Ensuring all dependencies are installed (Java, Android Studio, etc.)
+
+**How this helps:**
+- Ensures a working Flutter environment for building and testing real mobile apps
+- Emulator setup allows for rapid development and debugging
+- Foundation for integrating advanced features (Firebase, APIs, etc.)
+
+---
+
 ## 📱 Features
 
 ### Core Functionality
