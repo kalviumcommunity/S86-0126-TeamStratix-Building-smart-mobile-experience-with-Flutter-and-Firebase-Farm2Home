@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../services/cart_service.dart';
+import '../services/auth_service.dart';
 import 'cart_screen.dart';
+import 'login_screen.dart';
 
 /// Products screen displaying all available products
 class ProductsScreen extends StatelessWidget {
@@ -18,6 +20,14 @@ class ProductsScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF4A7C4A),
         foregroundColor: Colors.white,
         actions: [
+          // User profile icon
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              _showProfileMenu(context);
+            },
+          ),
+          // Cart icon
           Stack(
             children: [
               IconButton(
@@ -82,6 +92,54 @@ class ProductsScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  void _showProfileMenu(BuildContext context) {
+    final authService = AuthService();
+    final user = authService.currentUser;
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Profile'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (user != null) ...[
+                Text('Email: ${user.email}'),
+                const SizedBox(height: 8),
+                Text('User ID: ${user.uid.substring(0, 8)}...'),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await authService.logout();
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
+                  );
+                }
+              },
+              child: const Text(
+                'Logout',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
