@@ -147,6 +147,55 @@ lib/
     └── cart_screen.dart               # Shopping cart
 ```
 
+# Project Structure Overview
+
+This project follows the standard Flutter folder structure for scalability and teamwork. See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for a detailed breakdown.
+
+## Folder Hierarchy Example
+
+```
+farm2home_app/
+├── android/
+├── assets/
+├── ios/
+├── lib/
+│   ├── main.dart
+│   ├── screens/
+│   ├── widgets/
+│   ├── services/
+│   └── models/
+├── test/
+├── pubspec.yaml
+├── .gitignore
+├── README.md
+└── build/
+```
+
+## Folder/Files Purpose (Summary)
+- **lib/**: Main Dart code (screens, widgets, services, models)
+- **android/**: Android build/config files
+- **ios/**: iOS build/config files
+- **assets/**: Images, fonts, static files
+- **test/**: Automated tests
+- **pubspec.yaml**: Project dependencies/config
+- **.gitignore**: Files to ignore in git
+- **README.md**: Project documentation
+- **build/**: Auto-generated build outputs
+
+## Screenshot: Project Structure in IDE
+
+![Project Structure](screenshots/project_structure.png)
+
+## Reflection
+- **Why understand the structure?**
+  - Makes it easy to find, debug, and extend code
+  - Onboards new team members quickly
+- **How does it help teamwork?**
+  - Allows parallel development on screens, widgets, and services
+  - Reduces merge conflicts and improves code quality
+
+---
+
 ## 🔐 Authentication Service
 
 ### Sign Up
