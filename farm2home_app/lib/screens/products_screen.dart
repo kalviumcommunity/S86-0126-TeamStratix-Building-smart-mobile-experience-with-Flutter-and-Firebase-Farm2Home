@@ -13,6 +13,10 @@ class ProductsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final searchController = TextEditingController();
+    ValueNotifier<String> searchQuery = ValueNotifier('');
+    ValueNotifier<List<Product>> filteredProducts = ValueNotifier(sampleProducts);
+
     return Scaffold(
       backgroundColor: const Color(0xFFD4EDD4),
       appBar: AppBar(
@@ -20,14 +24,12 @@ class ProductsScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF4A7C4A),
         foregroundColor: Colors.white,
         actions: [
-          // User profile icon
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
               _showProfileMenu(context);
             },
           ),
-          // Cart icon
           Stack(
             children: [
               IconButton(
@@ -70,27 +72,79 @@ class ProductsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListenableBuilder(
-        listenable: cartService,
-        builder: (context, child) {
-          return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.75,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search groceries...',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    final query = searchController.text.trim().toLowerCase();
+                    filteredProducts.value = query.isEmpty
+                        ? sampleProducts
+                        : sampleProducts.where((p) => p.name.toLowerCase().contains(query)).toList();
+                  },
+                  child: const Text('Search'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4A7C4A),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            itemCount: sampleProducts.length,
-            itemBuilder: (context, index) {
-              final product = sampleProducts[index];
-              return ProductCard(
-                product: product,
-                onAddToCart: () => cartService.addToCart(product),
-              );
-            },
-          );
-        },
+          ),
+          Expanded(
+            child: ListenableBuilder(
+              listenable: cartService,
+              builder: (context, child) {
+                return ValueListenableBuilder<List<Product>>(
+                  valueListenable: filteredProducts,
+                  builder: (context, products, _) {
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 1.2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: products.length,
+                      itemBuilder: (context, index) {
+                        final product = products[index];
+                        return ProductCard(
+                          product: product,
+                          onAddToCart: () => cartService.addToCart(product),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -173,9 +227,12 @@ class ProductCard extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               ),
               child: Center(
-                child: Text(
-                  product.imageIcon,
-                  style: const TextStyle(fontSize: 48),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0), // Less padding around icon
+                  child: Text(
+                    product.imageIcon,
+                    style: const TextStyle(fontSize: 32),
+                  ),
                 ),
               ),
             ),

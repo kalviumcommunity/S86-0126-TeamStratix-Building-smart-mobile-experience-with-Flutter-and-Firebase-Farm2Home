@@ -1,5 +1,73 @@
 
+
 # Farm2Home App 🌱
+
+---
+
+## 🏗️ Stateless vs Stateful Widgets Demo
+
+### Project Description
+This demo showcases the difference between Stateless and Stateful widgets in Flutter. The header is a StatelessWidget, while the counter and theme toggle are managed by a StatefulWidget.
+
+### What are Stateless and Stateful Widgets?
+**StatelessWidget:**
+- Does not store mutable state. Used for static UI elements.
+
+**StatefulWidget:**
+- Maintains internal state. Used for interactive or dynamic UI elements.
+
+### Code Snippets
+#### StatelessWidget Example
+```dart
+class DemoHeader extends StatelessWidget {
+  final String title;
+  const DemoHeader({super.key, required this.title});
+  @override
+  Widget build(BuildContext context) {
+    return Text(title);
+  }
+}
+```
+
+#### StatefulWidget Example
+```dart
+class DemoCounter extends StatefulWidget {
+  @override
+  State<DemoCounter> createState() => _DemoCounterState();
+}
+
+class _DemoCounterState extends State<DemoCounter> {
+  int count = 0;
+  void increment() {
+    setState(() { count++; });
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text('Counter: $count'),
+        ElevatedButton(onPressed: increment, child: Text('Increase')),
+      ],
+    );
+  }
+}
+```
+
+### Screenshots
+#### Initial State
+![StatelessStatefulDemo - Initial](screenshots/stateless_stateful_initial.png)
+
+#### After Interaction
+![StatelessStatefulDemo - Updated](screenshots/stateless_stateful_updated.png)
+
+### Reflection
+**How do Stateful widgets make Flutter apps dynamic?**
+> They allow the UI to update in response to user actions or data changes, making apps interactive and responsive.
+
+**Why is it important to separate static and reactive parts of the UI?**
+> It improves code clarity, performance, and maintainability by ensuring only necessary widgets rebuild when state changes.
+
+---
 
 ---
 
