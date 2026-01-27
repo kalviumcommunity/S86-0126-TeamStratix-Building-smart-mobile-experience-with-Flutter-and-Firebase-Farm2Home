@@ -1,4 +1,61 @@
+
 # Farm2Home App 🌱
+
+---
+
+## 🧩 Flutter Widget Tree & Reactive UI Demo
+
+### Widget Tree Concept
+In Flutter, everything is a widget—text, buttons, containers, and layouts. Widgets are arranged in a tree structure, where each node represents a part of the UI. The root is usually a `MaterialApp` or `CupertinoApp`, followed by nested child widgets.
+
+#### Example Widget Tree (WelcomeScreen)
+
+```
+MaterialApp
+ ┗ Scaffold
+   ┣ AppBar
+   ┗ Body (Center)
+     ┗ Padding
+       ┗ Column
+         ┣ Icon
+         ┣ Text (Title)
+         ┣ Text (Subtitle)
+         ┣ ElevatedButton
+         ┗ (if welcomed) Container (Status Row)
+```
+
+### Reactive UI Model
+Flutter’s UI is reactive: when data (state) changes, the framework automatically rebuilds the affected widgets. For example, in `WelcomeScreen`, pressing the button toggles `_isWelcomed` and changes the background color, title, subtitle, and shows a status indicator. This is achieved using `setState()`:
+
+```dart
+setState(() {
+  _isWelcomed = !_isWelcomed;
+  _backgroundColor = _isWelcomed ? Colors.green.shade100 : Colors.green.shade50;
+});
+```
+
+Only the widgets that depend on this state are rebuilt, making updates efficient.
+
+### Visual Demo: WelcomeScreen
+
+#### Initial State
+![Welcome Screen - Initial](screenshots/welcome_initial.png)
+
+#### After State Change
+![Welcome Screen - Welcomed](screenshots/welcome_welcomed.png)
+
+### Explanation
+
+**What is a widget tree?**
+> A hierarchical structure where each node is a widget, representing the UI layout and elements. Parent widgets contain and organize child widgets.
+
+**How does the reactive model work in Flutter?**
+> When state changes (e.g., via `setState()`), Flutter rebuilds only the widgets affected by that state, not the entire UI. This ensures efficient updates and smooth user experiences.
+
+**Why does Flutter rebuild only parts of the tree?**
+> Flutter’s framework tracks which widgets depend on which pieces of state. When state changes, only those widgets are rebuilt, minimizing unnecessary work and improving performance.
+
+---
 
 A Flutter-based e-commerce application connecting consumers with fresh, organic produce from local farms, powered by Firebase for authentication and real-time data storage.
 
