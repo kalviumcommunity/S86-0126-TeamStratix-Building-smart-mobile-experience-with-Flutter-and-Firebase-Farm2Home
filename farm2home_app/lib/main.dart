@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/login_screen.dart';
+import 'screens/signup_screen.dart'; // SignUpScreen class
+import 'screens/welcome_screen.dart';
+import 'screens/products_screen.dart';
+import 'screens/cart_screen.dart';
 import 'services/auth_service.dart';
 import 'services/cart_service.dart';
 import 'screens/home_screen.dart';
@@ -32,7 +36,18 @@ class Farm2HomeApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const AuthWrapper(),
+      // Initial route - starts with authentication check
+      initialRoute: '/',
+      // Named routes for navigation
+      routes: {
+        '/': (context) => const AuthWrapper(),
+        '/welcome': (context) => const WelcomeScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignUpScreen(),
+        '/home': (context) => HomeScreen(cartService: CartService()),
+        '/products': (context) => ProductsScreen(cartService: CartService()),
+        '/cart': (context) => CartScreen(cartService: CartService()),
+      },
     );
   }
 }
