@@ -6,6 +6,7 @@ import 'screens/signup_screen.dart'; // SignUpScreen class
 import 'screens/welcome_screen.dart';
 import 'screens/products_screen.dart';
 import 'screens/cart_screen.dart';
+import 'screens/responsive_layout_screen.dart';
 import 'services/auth_service.dart';
 import 'services/cart_service.dart';
 import 'screens/home_screen.dart';
@@ -47,6 +48,7 @@ class Farm2HomeApp extends StatelessWidget {
         '/home': (context) => HomeScreen(cartService: CartService()),
         '/products': (context) => ProductsScreen(cartService: CartService()),
         '/cart': (context) => CartScreen(cartService: CartService()),
+        '/responsive-layout': (context) => const ResponsiveLayoutScreen(),
       },
     );
   }
