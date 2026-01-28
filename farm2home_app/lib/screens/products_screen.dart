@@ -24,6 +24,13 @@ class ProductsScreen extends StatelessWidget {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
+            icon: const Icon(Icons.view_list),
+            onPressed: () {
+              Navigator.pushNamed(context, '/scrollable-views');
+            },
+            tooltip: 'Scrollable Views Demo',
+          ),
+          IconButton(
             icon: const Icon(Icons.dashboard),
             onPressed: () {
               Navigator.pushNamed(context, '/responsive-layout');
