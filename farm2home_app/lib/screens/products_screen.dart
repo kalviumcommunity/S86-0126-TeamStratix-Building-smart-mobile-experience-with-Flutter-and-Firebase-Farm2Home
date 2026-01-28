@@ -14,7 +14,6 @@ class ProductsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final searchController = TextEditingController();
-    ValueNotifier<String> searchQuery = ValueNotifier('');
     ValueNotifier<List<Product>> filteredProducts = ValueNotifier(sampleProducts);
 
     return Scaffold(
@@ -102,7 +101,6 @@ class ProductsScreen extends StatelessWidget {
                         ? sampleProducts
                         : sampleProducts.where((p) => p.name.toLowerCase().contains(query)).toList();
                   },
-                  child: const Text('Search'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A7C4A),
                     foregroundColor: Colors.white,
@@ -111,6 +109,7 @@ class ProductsScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+                  child: const Text('Search'),
                 ),
               ],
             ),
