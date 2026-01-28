@@ -1388,3 +1388,677 @@ class TeamDebugTools {
 **Development Tools Status**: ✅ Documented and Ready to Use
 
 ---
+
+## 🧭 Multi-Screen Navigation in Flutter
+
+### Overview
+Flutter apps typically consist of multiple screens (pages) that users navigate between. The Farm2Home app demonstrates comprehensive navigation patterns using Flutter's `Navigator` class with named routes for better organization and maintainability.
+
+---
+
+## 📚 Understanding Flutter Navigation
+
+### What is the Navigator?
+The **Navigator** is a widget that manages a stack (pile) of Route objects and provides methods to manage the stack. Think of it like a stack of cards where:
+- **New screen pushed** = Add a card on top
+- **Pop/back** = Remove the top card
+- **Bottom card** = First screen (home/login)
+
+### Navigation Stack Visualization
+
+```
+┌─────────────────────┐
+│   Cart Screen       │ ← Current (Top of stack)
+├─────────────────────┤
+│   Products Screen   │
+├─────────────────────┤
+│   Login Screen      │ ← Bottom of stack
+└─────────────────────┘
+
+After Navigator.pop():
+┌─────────────────────┐
+│   Products Screen   │ ← Now current
+├─────────────────────┤
+│   Login Screen      │
+└─────────────────────┘
+```
+
+### Key Navigation Methods
+
+| Method | Purpose | Use Case |
+|--------|---------|----------|
+| `Navigator.push()` | Add new screen to stack | Navigate to detail page |
+| `Navigator.pop()` | Remove current screen | Go back button |
+| `Navigator.pushReplacement()` | Replace current screen | After login (can't go back) |
+| `Navigator.pushNamed()` | Navigate using route name | Clean, organized navigation |
+| `Navigator.popUntil()` | Pop multiple screens | Back to home from deep navigation |
+
+---
+
+## 🗺️ Farm2Home App Navigation Structure
+
+### Route Map
+
+```
+Farm2Home App Routes
+│
+├─ / (Root)
+│  └─ AuthWrapper (checks login status)
+│     ├─ If logged in → /home
+│     └─ If not logged in → /login
+│
+├─ /welcome
+│  └─ WelcomeScreen (app introduction)
+│
+├─ /login
+│  └─ LoginScreen
+│     ├─ Success → /home (replaces)
+│     └─ Sign up link → /signup
+│
+├─ /signup
+│  └─ SignupScreen
+│     ├─ Success → /home (replaces)
+│     └─ Login link → /login (replaces)
+│
+├─ /home
+│  └─ HomeScreen (wrapper for products)
+│
+├─ /products
+│  └─ ProductsScreen
+│     ├─ Cart icon → /cart (push)
+│     └─ Logout → /login (replaces)
+│
+└─ /cart
+   └─ CartScreen
+      └─ Back button → pop to products
+```
+
+---
+
+## 🔧 Implementation Details
+
+### 1. Defining Named Routes in main.dart
+
+```dart
+import 'package:flutter/material.dart';
+import 'screens/login_screen.dart';
+import 'screens/signup_screen.dart';
+import 'screens/welcome_screen.dart';
+import 'screens/products_screen.dart';
+import 'screens/cart_screen.dart';
+
+void main() {
+  runApp(const Farm2HomeApp());
+}
+
+class Farm2HomeApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Farm2Home',
+      // Define the initial route
+      initialRoute: '/',
+      // Define all named routes
+      routes: {
+        '/': (context) => const AuthWrapper(),
+        '/welcome': (context) => const WelcomeScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
+        '/home': (context) => HomeScreen(cartService: CartService()),
+        '/products': (context) => ProductsScreen(cartService: CartService()),
+        '/cart': (context) => CartScreen(cartService: CartService()),
+      },
+    );
+  }
+}
+```
+
+**Benefits**:
+- ✅ Centralized route management
+- ✅ Easy to see all app screens
+- ✅ Cleaner navigation code
+- ✅ Better for deep linking (future feature)
+
+---
+
+### 2. Screen Examples with Navigation
+
+#### Login Screen → Home (after successful login)
+
+```dart
+// lib/screens/login_screen.dart
+Future<void> _login() async {
+  try {
+    final user = await _authService.login(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
+
+    if (user != null && mounted) {
+      // Use pushReplacement - user can't go back to login
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(cartService: CartService()),
+        ),
+      );
+    }
+  } catch (e) {
+    // Handle error
+  }
+}
+```
+
+**Why `pushReplacement`?**
+- After login, user shouldn't go "back" to login screen
+- Removes login screen from navigation stack
+- Creates better user experience
+
+---
+
+#### Login Screen ↔ Signup Screen
+
+```dart
+// Navigate from Login to Signup
+TextButton(
+  onPressed: () {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SignupScreen(),
+      ),
+    );
+  },
+  child: const Text('Create Account'),
+)
+```
+
+```dart
+// Navigate from Signup to Login
+TextButton(
+  onPressed: () {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LoginScreen(),
+      ),
+    );
+  },
+  child: const Text('Already have an account? Login'),
+)
+```
+
+**Why `pushReplacement` here too?**
+- Prevents building up a stack of login/signup screens
+- User stays at same "level" in navigation
+- Cleaner back button behavior
+
+---
+
+#### Products Screen → Cart Screen
+
+```dart
+// lib/screens/products_screen.dart
+IconButton(
+  icon: const Icon(Icons.shopping_cart),
+  onPressed: () {
+    // Use regular push - user can go back
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CartScreen(cartService: cartService),
+      ),
+    );
+  },
+)
+```
+
+**Why regular `push`?**
+- User might want to return to products
+- Cart is a "detail" view of shopping
+- Preserves navigation history
+
+---
+
+#### Cart Screen → Back to Products
+
+```dart
+// Automatic with AppBar back button
+// Or manual:
+ElevatedButton(
+  onPressed: () {
+    Navigator.pop(context);
+  },
+  child: const Text('Continue Shopping'),
+)
+```
+
+---
+
+### 3. Using Named Routes (Alternative Method)
+
+**Current Implementation** (Direct navigation):
+```dart
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => CartScreen(cartService: cartService),
+  ),
+);
+```
+
+**Named Routes Alternative**:
+```dart
+// Navigate to cart using name
+Navigator.pushNamed(context, '/cart');
+
+// With arguments (if needed)
+Navigator.pushNamed(
+  context, 
+  '/cart',
+  arguments: {'userId': '123', 'fromPromo': true},
+);
+```
+
+**Receiving Arguments**:
+```dart
+@override
+Widget build(BuildContext context) {
+  // Extract arguments
+  final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+  final userId = args?['userId'] ?? 'unknown';
+  
+  return Scaffold(
+    appBar: AppBar(title: Text('Cart for $userId')),
+    // ... rest of widget
+  );
+}
+```
+
+---
+
+## 🎯 Navigation Patterns in Farm2Home
+
+### 1. Authentication Flow
+
+```dart
+// AuthWrapper checks login state
+class AuthWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: authService.authStateChanges,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          // User logged in → Navigate to Home
+          return HomeScreen(cartService: CartService());
+        }
+        // User not logged in → Show Login
+        return const LoginScreen();
+      },
+    );
+  }
+}
+```
+
+**Flow**:
+```
+App Start → AuthWrapper
+   ├─ Logged in? → HomeScreen → ProductsScreen
+   └─ Not logged in? → LoginScreen
+      ├─ Sign up → SignupScreen → (success) → HomeScreen
+      └─ Login → (success) → HomeScreen
+```
+
+---
+
+### 2. Shopping Flow
+
+```
+ProductsScreen
+   ↓ (tap product)
+   Add to cart (no navigation)
+   ↓ (tap cart icon)
+   CartScreen
+   ↓ (tap back or continue shopping)
+   ProductsScreen (pop)
+   ↓ (checkout)
+   Order confirmation (future feature)
+```
+
+---
+
+### 3. Logout Flow
+
+```dart
+// Logout from any screen
+await authService.logout();
+Navigator.of(context).pushReplacement(
+  MaterialPageRoute(
+    builder: (context) => const LoginScreen(),
+  ),
+);
+```
+
+**Result**:
+- Current screen replaced with login
+- User cannot go back to authenticated screens
+- Clean logout experience
+
+---
+
+## 📸 Navigation Screenshots
+
+### Screen Flow Demonstration
+
+#### 1. Welcome Screen
+![Welcome Screen](screenshots/welcome_screen.png)
+*Entry point with app introduction*
+
+#### 2. Login Screen
+![Login Screen](screenshots/login_screen.png)
+*Authentication entry - links to signup*
+
+#### 3. Signup Screen
+![Signup Screen](screenshots/signup_screen.png)
+*New user registration - links back to login*
+
+#### 4. Products Screen
+![Products Screen](screenshots/products_screen.png)
+*Main shopping interface with cart navigation*
+
+#### 5. Cart Screen
+![Cart Screen](screenshots/cart_screen.png)
+*Shopping cart with back navigation*
+
+#### Navigation in Action
+![Navigation Demo](screenshots/navigation_demo.gif)
+*Animated demonstration of screen transitions*
+
+---
+
+## 🤔 Reflection on Navigation
+
+### How Does Navigator Manage the App's Stack of Screens?
+
+The Navigator uses a **Last-In-First-Out (LIFO) stack** data structure to manage screens:
+
+1. **Stack Management**:
+   ```
+   Initial: [LoginScreen]
+   
+   After push to Products: [LoginScreen, ProductsScreen]
+   
+   After push to Cart: [LoginScreen, ProductsScreen, CartScreen]
+   
+   After pop: [LoginScreen, ProductsScreen]
+   ```
+
+2. **Memory Efficiency**:
+   - Screens lower in the stack are kept in memory
+   - Can be optimized with lazy loading
+   - Flutter's framework handles most optimization automatically
+
+3. **State Preservation**:
+   - When you `push`, the previous screen stays in memory
+   - When you `pop`, you return to the same state
+   - Example: Scroll position preserved when going back
+
+4. **Route Lifecycle**:
+   ```dart
+   // Screen A
+   Navigator.push(context, route) 
+   → Screen A paused (initState already called)
+   → Screen B created (initState called)
+   → Screen B displayed
+   
+   Navigator.pop(context)
+   → Screen B destroyed (dispose called)
+   → Screen A resumed (no initState, uses existing state)
+   ```
+
+---
+
+### What Are the Benefits of Using Named Routes in Larger Applications?
+
+#### 1. **Code Organization** 📂
+```dart
+// Without named routes (messy)
+Navigator.push(context, MaterialPageRoute(builder: (_) => ProductsScreen(...)));
+Navigator.push(context, MaterialPageRoute(builder: (_) => CartScreen(...)));
+Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(...)));
+
+// With named routes (clean)
+Navigator.pushNamed(context, '/products');
+Navigator.pushNamed(context, '/cart');
+Navigator.pushNamed(context, '/profile');
+```
+
+#### 2. **Centralized Route Management** 🎯
+All routes defined in one place (main.dart):
+- Easy to see all app screens at a glance
+- Modify routing logic in one location
+- Better for code reviews and documentation
+
+#### 3. **Deep Linking Support** 🔗
+Named routes make it easier to implement deep links:
+```dart
+// Handle deep link: myapp://products/123
+if (deepLinkRoute == '/products/123') {
+  Navigator.pushNamed(context, '/products', arguments: {'id': '123'});
+}
+```
+
+#### 4. **Easier Refactoring** 🔧
+```dart
+// Change implementation without changing navigation calls
+routes: {
+  '/products': (context) => NewProductsScreen(), // Changed class
+  // All Navigator.pushNamed('/products') still work!
+}
+```
+
+#### 5. **Testing Benefits** 🧪
+```dart
+testWidgets('Navigate to cart', (tester) async {
+  await tester.pumpWidget(MyApp());
+  
+  // Find and tap cart button
+  await tester.tap(find.byIcon(Icons.shopping_cart));
+  await tester.pumpAndSettle();
+  
+  // Verify navigation
+  expect(find.byType(CartScreen), findsOneWidget);
+});
+```
+
+#### 6. **Route Guards & Middleware** 🛡️
+Easier to add authentication checks:
+```dart
+Route<dynamic>? onGenerateRoute(RouteSettings settings) {
+  // Check authentication before allowing navigation
+  if (settings.name == '/profile' && !isLoggedIn) {
+    return MaterialPageRoute(builder: (_) => LoginScreen());
+  }
+  // ... handle other routes
+}
+```
+
+#### 7. **Analytics & Tracking** 📊
+Centralized location to add analytics:
+```dart
+routes: {
+  '/products': (context) {
+    analytics.logScreenView(screenName: 'Products');
+    return ProductsScreen();
+  },
+}
+```
+
+#### 8. **Consistency Across Team** 👥
+- Team members use consistent navigation patterns
+- Reduces navigation bugs
+- Easier onboarding for new developers
+
+---
+
+## 🎓 Navigation Best Practices
+
+### 1. Choose the Right Navigation Method
+
+| Scenario | Method | Reason |
+|----------|--------|--------|
+| Login → Home | `pushReplacement` | Can't go back to login |
+| Products → Cart | `push` | Can return to products |
+| Deep navigation reset | `pushNamedAndRemoveUntil` | Clear stack to home |
+| Back button | `pop` | Return to previous screen |
+
+### 2. Handle Navigation Context Properly
+
+```dart
+// ✅ Good - check if widget is still mounted
+if (mounted) {
+  Navigator.push(context, ...);
+}
+
+// ❌ Bad - might navigate after widget disposed
+Navigator.push(context, ...);
+```
+
+### 3. Avoid Navigation Memory Leaks
+
+```dart
+// ✅ Good - replace login after successful auth
+Navigator.pushReplacement(context, ...);
+
+// ❌ Bad - keeps accumulating login screens
+Navigator.push(context, LoginScreen());
+Navigator.push(context, LoginScreen());
+Navigator.push(context, LoginScreen());
+```
+
+### 4. Use Named Routes for Large Apps
+
+```dart
+// ✅ Scalable for 50+ screens
+Navigator.pushNamed(context, '/products/details');
+
+// ⚠️ Gets messy with many screens
+Navigator.push(context, MaterialPageRoute(...));
+```
+
+---
+
+## 🔄 Advanced Navigation Patterns
+
+### 1. Navigate and Clear Stack
+
+```dart
+// Go to home and remove everything else
+Navigator.pushNamedAndRemoveUntil(
+  context,
+  '/home',
+  (route) => false, // Remove all previous routes
+);
+```
+
+**Use Case**: Logout, completing onboarding
+
+### 2. Conditional Navigation
+
+```dart
+void navigateBasedOnRole(String role) {
+  if (role == 'admin') {
+    Navigator.pushNamed(context, '/admin');
+  } else if (role == 'seller') {
+    Navigator.pushNamed(context, '/seller');
+  } else {
+    Navigator.pushNamed(context, '/customer');
+  }
+}
+```
+
+### 3. Pass Complex Data Between Screens
+
+```dart
+// Passing data forward
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => ProductDetailsScreen(product: selectedProduct),
+  ),
+);
+
+// Getting data back
+final result = await Navigator.push<bool>(
+  context,
+  MaterialPageRoute(builder: (context) => ConfirmationScreen()),
+);
+
+if (result == true) {
+  // User confirmed
+}
+```
+
+---
+
+## 📊 Navigation Summary
+
+### Current Farm2Home Navigation Features
+
+✅ **Implemented**:
+- Multi-screen navigation (6+ screens)
+- Authentication-based routing
+- Stack management with push/pop
+- Proper use of pushReplacement
+- Cart navigation with state preservation
+- Logout with stack clearing
+
+🔜 **Future Enhancements**:
+- Named routes fully implemented everywhere
+- Deep linking support
+- Navigation analytics
+- Route guards for protected screens
+- Transition animations
+- Bottom navigation bar for quick access
+
+---
+
+## 🛠️ Testing Navigation
+
+### Manual Testing Checklist
+
+- [ ] App starts at correct screen based on auth state
+- [ ] Can navigate from login to signup and back
+- [ ] Successful login navigates to home
+- [ ] Can't use back button to return to login after login
+- [ ] Cart icon navigates to cart screen
+- [ ] Back button returns from cart to products
+- [ ] Logout navigates to login and clears stack
+- [ ] Navigation animations are smooth
+- [ ] No duplicate screens in stack
+
+### Code Example: Navigation Test
+
+```dart
+testWidgets('Navigation flow test', (WidgetTester tester) async {
+  await tester.pumpWidget(Farm2HomeApp());
+  
+  // Should start at login
+  expect(find.byType(LoginScreen), findsOneWidget);
+  
+  // Tap signup link
+  await tester.tap(find.text('Create Account'));
+  await tester.pumpAndSettle();
+  
+  // Should show signup
+  expect(find.byType(SignupScreen), findsOneWidget);
+  expect(find.byType(LoginScreen), findsNothing);
+});
+```
+
+---
+
+**Navigation Implementation Status**: ✅ Complete and Documented
+
+---
