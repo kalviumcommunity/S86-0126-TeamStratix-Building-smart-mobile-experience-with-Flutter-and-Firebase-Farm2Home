@@ -24,6 +24,13 @@ class ProductsScreen extends StatelessWidget {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
+            icon: const Icon(Icons.dashboard),
+            onPressed: () {
+              Navigator.pushNamed(context, '/responsive-layout');
+            },
+            tooltip: 'Responsive Layout Demo',
+          ),
+          IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
               _showProfileMenu(context);

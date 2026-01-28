@@ -2062,3 +2062,996 @@ testWidgets('Navigation flow test', (WidgetTester tester) async {
 **Navigation Implementation Status**: ✅ Complete and Documented
 
 ---
+
+## 📱 Responsive Layout & Core Widgets
+
+### Overview
+Flutter provides powerful layout widgets that enable creating responsive, adaptive user interfaces that work seamlessly across different screen sizes—from mobile phones to tablets and desktops. This section demonstrates Container, Row, Column, and responsive design techniques.
+
+---
+
+
+## 🧱 Core Layout Widgets
+
+### 1. Container Widget
+
+The **Container** is Flutter's most versatile layout widget—a flexible box that can:
+- Hold child widgets
+- Define padding and margin
+- Set background colors and decorations
+- Control alignment and dimensions
+- Add borders and shadows
+
+#### Basic Container Example
+
+```dart
+Container(
+  padding: EdgeInsets.all(16),
+  margin: EdgeInsets.symmetric(horizontal: 20),
+  decoration: BoxDecoration(
+    color: Colors.blue,
+    borderRadius: BorderRadius.circular(12),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.1),
+        blurRadius: 10,
+        offset: Offset(0, 4),
+      ),
+    ],
+  ),
+  child: Text('This is inside a Container'),
+);
+```
+
+#### Container Properties
+
+| Property | Purpose | Example |
+|----------|---------|---------|
+| `padding` | Internal spacing | `EdgeInsets.all(16)` |
+| `margin` | External spacing | `EdgeInsets.symmetric(horizontal: 20)` |
+| `color` | Background color | `Colors.blue` |
+| `width` / `height` | Fixed dimensions | `width: 200, height: 100` |
+| `decoration` | Complex styling | `BoxDecoration(...)` |
+| `alignment` | Child positioning | `Alignment.center` |
+| `constraints` | Min/max dimensions | `BoxConstraints(maxWidth: 500)` |
+
+#### Advanced Container in Farm2Home
+
+```dart
+// Header section with gradient
+Container(
+  width: double.infinity,
+  height: 180,
+  decoration: BoxDecoration(
+    gradient: LinearGradient(
+      colors: [Color(0xFF4A7C4A), Color(0xFF2D5A2D)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+    borderRadius: BorderRadius.circular(16),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.1),
+        blurRadius: 10,
+        offset: Offset(0, 4),
+      ),
+    ],
+  ),
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Icon(Icons.agriculture, size: 64, color: Colors.white),
+      SizedBox(height: 12),
+      Text(
+        'Farm2Home',
+        style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+    ],
+  ),
+);
+```
+
+---
+
+### 2. Row Widget
+
+The **Row** widget arranges children horizontally (left to right). Perfect for:
+- Navigation bars
+- Icon groups
+- Side-by-side layouts
+- Statistics displays
+
+#### Basic Row Example
+
+```dart
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  crossAxisAlignment: CrossAxisAlignment.center,
+  children: [
+    Icon(Icons.home, size: 32),
+    Icon(Icons.search, size: 32),
+    Icon(Icons.person, size: 32),
+  ],
+);
+```
+
+#### Row Alignment Properties
+
+**mainAxisAlignment** (horizontal direction):
+- `start` - Align to left
+- `center` - Center items
+- `end` - Align to right
+- `spaceBetween` - Equal space between items
+- `spaceEvenly` - Equal space including edges
+- `spaceAround` - Half space at edges
+
+**crossAxisAlignment** (vertical direction):
+- `start` - Align to top
+- `center` - Center vertically
+- `end` - Align to bottom
+- `stretch` - Fill height
+
+#### Row with Expanded in Farm2Home
+
+```dart
+// Statistics section
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  children: [
+    Column(
+      children: [
+        Text('500+', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        Text('Products', style: TextStyle(fontSize: 12)),
+      ],
+    ),
+    Container(width: 1, height: 40, color: Colors.black26), // Divider
+    Column(
+      children: [
+        Text('10K+', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        Text('Customers', style: TextStyle(fontSize: 12)),
+      ],
+    ),
+    Container(width: 1, height: 40, color: Colors.black26),
+    Column(
+      children: [
+        Text('50+', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        Text('Farms', style: TextStyle(fontSize: 12)),
+      ],
+    ),
+  ],
+);
+```
+
+#### Expanded Widget in Rows
+
+```dart
+Row(
+  children: [
+    Expanded(
+      flex: 2, // Takes 2/3 of available space
+      child: Container(color: Colors.amber, height: 100),
+    ),
+    SizedBox(width: 10),
+    Expanded(
+      flex: 1, // Takes 1/3 of available space
+      child: Container(color: Colors.greenAccent, height: 100),
+    ),
+  ],
+);
+```
+
+---
+
+### 3. Column Widget
+
+The **Column** widget arranges children vertically (top to bottom). Perfect for:
+- Forms
+- Lists of content
+- Stacking widgets
+- Mobile-first layouts
+
+#### Basic Column Example
+
+```dart
+Column(
+  mainAxisAlignment: MainAxisAlignment.center,
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    Text('Welcome!', style: TextStyle(fontSize: 24)),
+    SizedBox(height: 10),
+    Text('Please login to continue'),
+    SizedBox(height: 20),
+    ElevatedButton(
+      onPressed: () {},
+      child: Text('Login'),
+    ),
+  ],
+);
+```
+
+#### Column Alignment Properties
+
+**mainAxisAlignment** (vertical direction):
+- `start` - Align to top
+- `center` - Center items
+- `end` - Align to bottom
+- `spaceBetween` - Equal space between items
+- `spaceEvenly` - Equal space including edges
+- `spaceAround` - Half space at edges
+
+**crossAxisAlignment** (horizontal direction):
+- `start` - Align to left
+- `center` - Center horizontally
+- `end` - Align to right
+- `stretch` - Fill width
+
+#### Column in Farm2Home Layout
+
+```dart
+Column(
+  crossAxisAlignment: CrossAxisAlignment.stretch,
+  children: [
+    // Header Section
+    _buildHeaderSection(screenWidth),
+    SizedBox(height: 16),
+    
+    // Info Cards
+    _buildInfoSection(isLargeScreen),
+    SizedBox(height: 16),
+    
+    // Feature Grid
+    _buildFeatureGrid(isLargeScreen),
+    SizedBox(height: 16),
+    
+    // Statistics
+    _buildStatisticsSection(),
+    SizedBox(height: 16),
+    
+    // Action Buttons
+    _buildActionButtons(isLargeScreen),
+  ],
+);
+```
+
+---
+
+## 📐 Responsive Design Implementation
+
+### Understanding MediaQuery
+
+**MediaQuery** provides access to device/screen information:
+
+```dart
+final screenWidth = MediaQuery.of(context).size.width;
+final screenHeight = MediaQuery.of(context).size.height;
+final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+final orientation = MediaQuery.of(context).orientation;
+final brightness = MediaQuery.of(context).platformBrightness;
+```
+
+### Breakpoint Strategy
+
+```dart
+// Define responsive breakpoints
+final screenWidth = MediaQuery.of(context).size.width;
+
+// Small: < 600px (phones)
+// Medium: 600-900px (tablets)
+// Large: > 900px (desktops)
+
+final isSmall = screenWidth < 600;
+final isMedium = screenWidth >= 600 && screenWidth < 900;
+final isLarge = screenWidth >= 900;
+
+// Or simplified
+final isLargeScreen = screenWidth > 600;
+```
+
+---
+
+## 🎯 Farm2Home Responsive Layout
+
+### Complete Implementation
+
+```dart
+import 'package:flutter/material.dart';
+
+class ResponsiveLayoutScreen extends StatelessWidget {
+  const ResponsiveLayoutScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Get screen dimensions
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth > 600;
+
+    return Scaffold(
+      appBar: AppBar(title: Text('Responsive Layout Demo')),
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            children: [
+              // Header - Always full width
+              _buildHeaderSection(screenWidth),
+              SizedBox(height: 16),
+              
+              // Info Cards - Responsive layout
+              _buildInfoSection(isLargeScreen),
+              SizedBox(height: 16),
+              
+              // Feature Grid - Adapts to screen
+              _buildFeatureGrid(isLargeScreen),
+              SizedBox(height: 16),
+              
+              // Statistics - Row layout
+              _buildStatisticsSection(),
+              SizedBox(height: 16),
+              
+              // Action Buttons - Responsive
+              _buildActionButtons(isLargeScreen),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoSection(bool isLargeScreen) {
+    if (isLargeScreen) {
+      // Side-by-side for large screens
+      return Row(
+        children: [
+          Expanded(child: _buildInfoCard('Fresh Products', Colors.amber)),
+          SizedBox(width: 16),
+          Expanded(child: _buildInfoCard('Fast Delivery', Colors.greenAccent)),
+        ],
+      );
+    } else {
+      // Stacked for small screens
+      return Column(
+        children: [
+          _buildInfoCard('Fresh Products', Colors.amber),
+          SizedBox(height: 16),
+          _buildInfoCard('Fast Delivery', Colors.greenAccent),
+        ],
+      );
+    }
+  }
+
+  Widget _buildFeatureGrid(bool isLargeScreen) {
+    if (isLargeScreen) {
+      // 4 columns on large screens
+      return Row(
+        children: [
+          Expanded(child: _buildFeatureItem(Icons.security, 'Secure')),
+          Expanded(child: _buildFeatureItem(Icons.support_agent, 'Support')),
+          Expanded(child: _buildFeatureItem(Icons.verified, 'Verified')),
+          Expanded(child: _buildFeatureItem(Icons.eco, 'Eco-Friendly')),
+        ],
+      );
+    } else {
+      // 2x2 grid on small screens
+      return Column(
+        children: [
+          Row(
+            children: [
+              Expanded(child: _buildFeatureItem(Icons.security, 'Secure')),
+              Expanded(child: _buildFeatureItem(Icons.support_agent, 'Support')),
+            ],
+          ),
+          SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: _buildFeatureItem(Icons.verified, 'Verified')),
+              Expanded(child: _buildFeatureItem(Icons.eco, 'Eco-Friendly')),
+            ],
+          ),
+        ],
+      );
+    }
+  }
+}
+```
+
+---
+
+## 📊 Responsive Layout Patterns
+
+### Pattern 1: Conditional Layout (if/else)
+
+```dart
+Widget build(BuildContext context) {
+  final isLargeScreen = MediaQuery.of(context).size.width > 600;
+  
+  if (isLargeScreen) {
+    return Row(children: [...]);  // Side by side
+  } else {
+    return Column(children: [...]);  // Stacked
+  }
+}
+```
+
+**Use Case**: Completely different layouts for different sizes
+
+---
+
+### Pattern 2: LayoutBuilder
+
+```dart
+Widget build(BuildContext context) {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      if (constraints.maxWidth > 600) {
+        return _buildWideLayout();
+      } else {
+        return _buildNarrowLayout();
+      }
+    },
+  );
+}
+```
+
+**Use Case**: Responsive to parent widget constraints, not just screen size
+
+---
+
+### Pattern 3: Flexible/Expanded Ratios
+
+```dart
+Row(
+  children: [
+    Flexible(
+      flex: 2,
+      child: Container(color: Colors.amber),
+    ),
+    Flexible(
+      flex: 1,
+      child: Container(color: Colors.green),
+    ),
+  ],
+);
+```
+
+**Use Case**: Proportional layouts that scale smoothly
+
+---
+
+### Pattern 4: Constrained Width
+
+```dart
+Container(
+  width: screenWidth > 600 ? 500 : double.infinity,
+  child: Card(
+    child: Text('Constrained content'),
+  ),
+);
+```
+
+**Use Case**: Content that shouldn't stretch too wide on large screens
+
+---
+
+### Pattern 5: GridView with Adaptive Columns
+
+```dart
+GridView.builder(
+  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: screenWidth > 900 ? 4 : (screenWidth > 600 ? 3 : 2),
+    childAspectRatio: 1,
+    crossAxisSpacing: 10,
+    mainAxisSpacing: 10,
+  ),
+  itemBuilder: (context, index) => ProductCard(),
+);
+```
+
+**Use Case**: Product grids, image galleries
+
+---
+
+## 🖼️ Screenshots: Responsive Behavior
+
+### Small Screen (Phone - Portrait)
+![Responsive Layout Small](screenshots/responsive_small.png)
+*Layout stacks vertically, 2-column feature grid*
+
+### Large Screen (Tablet - Landscape)
+![Responsive Layout Large](screenshots/responsive_large.png)
+*Side-by-side panels, 4-column feature grid*
+
+### Comparison View
+![Responsive Comparison](screenshots/responsive_comparison.png)
+*Same content adapts to different screen sizes*
+
+### Different Orientations
+![Portrait vs Landscape](screenshots/orientation_comparison.png)
+*Layout adjusts based on orientation*
+
+---
+
+## 🎨 Layout Combinations
+
+### Example 1: Card with Row and Column
+
+```dart
+Card(
+  child: Padding(
+    padding: EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title row with icon
+        Row(
+          children: [
+            Icon(Icons.agriculture, color: Colors.green),
+            SizedBox(width: 8),
+            Text('Farm Products', style: TextStyle(fontSize: 20)),
+          ],
+        ),
+        SizedBox(height: 12),
+        
+        // Description
+        Text('Fresh organic vegetables and fruits'),
+        SizedBox(height: 16),
+        
+        // Action buttons row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(onPressed: () {}, child: Text('Learn More')),
+            ElevatedButton(onPressed: () {}, child: Text('Shop Now')),
+          ],
+        ),
+      ],
+    ),
+  ),
+);
+```
+
+---
+
+### Example 2: Nested Rows and Columns
+
+```dart
+Container(
+  padding: EdgeInsets.all(16),
+  child: Column(
+    children: [
+      // Top row with 2 items
+      Row(
+        children: [
+          Expanded(
+            child: Column(
+              children: [
+                Icon(Icons.home),
+                Text('Home'),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                Icon(Icons.search),
+                Text('Search'),
+              ],
+            ),
+          ),
+        ],
+      ),
+      SizedBox(height: 20),
+      
+      // Bottom row with 2 items
+      Row(
+        children: [
+          Expanded(
+            child: Column(
+              children: [
+                Icon(Icons.shopping_cart),
+                Text('Cart'),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                Icon(Icons.person),
+                Text('Profile'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ],
+  ),
+);
+```
+
+---
+
+## 🤔 Reflection on Responsive Design
+
+### Why is Responsiveness Important in Mobile Apps?
+
+#### 1. **Device Diversity** 📱
+- **Problem**: Thousands of different screen sizes
+  - Phones: 4" to 7" screens
+  - Tablets: 8" to 13" screens
+  - Foldables: Multiple aspect ratios
+  - Desktops: 13" to 32"+ monitors
+
+- **Solution**: Responsive design adapts to any size
+  ```dart
+  // Works on all devices
+  final columns = screenWidth > 900 ? 4 : (screenWidth > 600 ? 3 : 2);
+  ```
+
+#### 2. **User Experience** ✨
+- **Fixed Layout Problems**:
+  - Text too small on large screens
+  - Buttons too cramped on small screens
+  - Wasted space on tablets
+  - Content overflow on phones
+
+- **Responsive Benefits**:
+  - Comfortable reading experience
+  - Touch-friendly button sizes
+  - Optimal content density
+  - Professional appearance
+
+#### 3. **Orientation Changes** 🔄
+Users rotate devices frequently:
+```dart
+final orientation = MediaQuery.of(context).orientation;
+
+if (orientation == Orientation.portrait) {
+  return Column(children: widgets);  // Stack vertically
+} else {
+  return Row(children: widgets);  // Side by side
+}
+```
+
+#### 4. **Accessibility** ♿
+- Large text settings
+- Different display zoom levels
+- Screen readers need proper layout
+- Responsive layouts handle these better
+
+#### 5. **Future-Proofing** 🚀
+- New devices with new sizes
+- Foldable phones
+- Wearables
+- Car displays
+- Responsive design adapts automatically
+
+#### 6. **Single Codebase** 💻
+```dart
+// One code, all platforms
+MaterialApp(
+  home: ResponsiveLayoutScreen(),  // Works everywhere!
+);
+```
+No need for separate tablet/phone versions
+
+---
+
+### What Challenges Did You Face While Managing Layout Proportions?
+
+#### Challenge 1: **Overflow Errors** ⚠️
+
+**Problem**:
+```dart
+// ❌ Causes overflow on small screens
+Row(
+  children: [
+    Container(width: 300, child: Text('Left')),
+    Container(width: 300, child: Text('Right')),
+  ],
+);
+```
+
+**Solution**:
+```dart
+// ✅ Adapts to available space
+Row(
+  children: [
+    Expanded(child: Text('Left')),
+    Expanded(child: Text('Right')),
+  ],
+);
+```
+
+**Learning**: Always use `Expanded` or `Flexible` in Rows/Columns when content size varies
+
+---
+
+#### Challenge 2: **Aspect Ratios**
+
+**Problem**: Keeping consistent proportions across devices
+
+**Solution**:
+```dart
+AspectRatio(
+  aspectRatio: 16 / 9,  // Maintains ratio
+  child: Image.network(imageUrl),
+);
+```
+
+**Learning**: Use `AspectRatio` widget for images and videos
+
+---
+
+#### Challenge 3: **Text Scaling**
+
+**Problem**: Fixed font sizes look wrong on different screens
+
+**Solution**:
+```dart
+// ❌ Fixed size
+Text('Title', style: TextStyle(fontSize: 20));
+
+// ✅ Responsive
+Text(
+  'Title',
+  style: TextStyle(
+    fontSize: screenWidth > 600 ? 24 : 18,
+  ),
+);
+
+// ✅ Or use Theme
+Text('Title', style: Theme.of(context).textTheme.headlineMedium);
+```
+
+**Learning**: Use theme-based text styles or calculate based on screen size
+
+---
+
+#### Challenge 4: **Testing on Multiple Devices**
+
+**Problem**: Layout looks good on emulator but breaks on real devices
+
+**Solution**:
+- Test on multiple screen sizes (small phone, large phone, tablet)
+- Use Flutter DevTools Widget Inspector
+- Test both portrait and landscape
+- Use `LayoutBuilder` for precise control
+
+**Learning**: Always test on at least 3 different screen sizes
+
+---
+
+#### Challenge 5: **Nested Flexible Widgets**
+
+**Problem**:
+```dart
+// ❌ Error: Expanded inside Expanded
+Column(
+  children: [
+    Expanded(
+      child: Row(
+        children: [
+          Expanded(child: Widget()),  // Works!
+        ],
+      ),
+    ),
+  ],
+);
+```
+
+**Solution**: Understand parent-child flex relationships
+
+**Learning**: `Expanded` needs a parent with unbounded constraints (Column, Row, Flex)
+
+---
+
+### How Can You Improve Your Layout for Different Screen Orientations?
+
+#### Strategy 1: **Detect Orientation**
+
+```dart
+@override
+Widget build(BuildContext context) {
+  final orientation = MediaQuery.of(context).orientation;
+  
+  return Scaffold(
+    body: orientation == Orientation.portrait
+        ? _buildPortraitLayout()
+        : _buildLandscapeLayout(),
+  );
+}
+```
+
+#### Strategy 2: **OrientationBuilder Widget**
+
+```dart
+OrientationBuilder(
+  builder: (context, orientation) {
+    return GridView.count(
+      crossAxisCount: orientation == Orientation.portrait ? 2 : 4,
+      children: products.map((p) => ProductCard(p)).toList(),
+    );
+  },
+);
+```
+
+#### Strategy 3: **Adaptive Columns**
+
+```dart
+Widget _buildAdaptiveGrid() {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      // Calculate columns based on width
+      int columns = (constraints.maxWidth / 150).floor();
+      columns = columns.clamp(2, 6);  // Min 2, max 6
+      
+      return GridView.count(
+        crossAxisCount: columns,
+        children: items,
+      );
+    },
+  );
+}
+```
+
+#### Strategy 4: **Safe Area Handling**
+
+```dart
+Scaffold(
+  body: SafeArea(  // Respects notches, status bar, etc.
+    child: OrientationBuilder(
+      builder: (context, orientation) {
+        return SingleChildScrollView(  // Prevent overflow in landscape
+          child: Column(children: widgets),
+        );
+      },
+    ),
+  ),
+);
+```
+
+#### Strategy 5: **Landscape-Specific Layouts**
+
+```dart
+Widget _buildLandscapeLayout() {
+  return Row(
+    children: [
+      // Navigation sidebar (visible in landscape)
+      Container(
+        width: 200,
+        child: NavigationDrawer(),
+      ),
+      // Main content
+      Expanded(
+        child: ContentArea(),
+      ),
+    ],
+  );
+}
+
+Widget _buildPortraitLayout() {
+  return Column(
+    children: [
+      // No sidebar in portrait (use bottom nav instead)
+      Expanded(child: ContentArea()),
+      BottomNavigationBar(...),
+    ],
+  );
+}
+```
+
+#### Best Practices for Orientation:
+
+1. **Use SingleChildScrollView** for vertical scrolling content
+2. **Test both orientations** during development
+3. **Consider landscape** as a tablet-like experience
+4. **Hide/show elements** based on available space
+5. **Lock orientation** when appropriate (games, camera)
+
+```dart
+// Lock to portrait (in main.dart)
+SystemChrome.setPreferredOrientations([
+  DeviceOrientation.portraitUp,
+  DeviceOrientation.portraitDown,
+]);
+```
+
+---
+
+## 📊 Responsive Design Summary
+
+### Key Takeaways
+
+| Concept | Purpose | Best Practice |
+|---------|---------|---------------|
+| **MediaQuery** | Get screen dimensions | Always check width for responsive decisions |
+| **Expanded** | Fill available space | Use in Row/Column for flexible layouts |
+| **Flexible** | Proportional sizing | Control flex ratios for custom proportions |
+| **LayoutBuilder** | Parent-aware layouts | Use when responsive to parent, not screen |
+| **OrientationBuilder** | Handle rotations | Adapt layout to portrait/landscape |
+| **SafeArea** | Avoid system UI | Respect notches, status bars |
+
+### Layout Widget Hierarchy
+
+```
+Container (styling, spacing)
+  └─ Column/Row (arrangement)
+      └─ Expanded/Flexible (sizing)
+          └─ Container (child styling)
+              └─ Your content
+```
+
+### Responsive Checklist
+
+- [ ] Test on small phone (< 400px width)
+- [ ] Test on standard phone (400-600px)
+- [ ] Test on tablet (600-900px)
+- [ ] Test on desktop (> 900px)
+- [ ] Test portrait orientation
+- [ ] Test landscape orientation
+- [ ] Check text doesn't overflow
+- [ ] Verify touch targets are 44x44 minimum
+- [ ] Ensure content is scrollable if needed
+- [ ] Test with different text scale settings
+- [ ] Verify images scale properly
+
+---
+
+## 🎯 Farm2Home Responsive Features
+
+### Implemented Features ✅
+
+1. **Adaptive Header**
+   - Full-width gradient container
+   - Shows current screen width
+   - Scales icon and text
+
+2. **Info Cards**
+   - Side-by-side on tablets/desktop
+   - Stacked on phones
+   - Consistent styling across sizes
+
+3. **Feature Grid**
+   - 4 columns on large screens
+   - 2x2 grid on small screens
+   - Even spacing maintained
+
+4. **Statistics Row**
+   - Always horizontal
+   - Evenly spaced
+   - Dividers between items
+
+5. **Action Buttons**
+   - Row layout on large screens
+   - Column layout on small screens
+   - Full-width on mobile
+
+6. **Footer**
+   - Adapts icon spacing
+   - Maintains readability
+
+---
+
+## 🚀 Access the Demo
+
+### In the App:
+1. Login to Farm2Home
+2. Click the **dashboard icon** (📊) in the Products screen app bar
+3. Explore the responsive layout
+4. Resize browser window to see adaptations (web)
+5. Rotate device to test orientation changes (mobile)
+
+### In Code:
+```dart
+// Navigate to responsive layout demo
+Navigator.pushNamed(context, '/responsive-layout');
+```
+
+---
+
+**Responsive Layout Status**: ✅ Complete with Comprehensive Examples
+
+---
