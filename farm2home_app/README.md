@@ -4,6 +4,319 @@
 
 ---
 
+## 📝 User Input Form with Validation (Sprint 2)
+
+### Overview
+A comprehensive user input form demonstrating form handling, validation, and user feedback in Flutter.
+
+### Features
+- ✅ **TextFormField widgets** for name and email input
+- ✅ **Real-time validation** with specific error messages
+- ✅ **Form state management** using GlobalKey<FormState>
+- ✅ **User feedback** via SnackBar (success/error) and AlertDialog
+- ✅ **Material Design 3** styling with green theme
+- ✅ **Form reset** functionality
+
+### Implementation Details
+
+#### 1. TextField Widgets
+The form uses `TextFormField` for controlled input with built-in validation:
+
+```dart
+TextFormField(
+  controller: _nameController,
+  decoration: InputDecoration(
+    labelText: 'Full Name',
+    hintText: 'Enter your full name',
+    prefixIcon: Icon(Icons.person, color: Colors.green[700]),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+  ),
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your name';
+    }
+    if (value.length < 2) {
+      return 'Name must be at least 2 characters long';
+    }
+    return null;
+  },
+)
+```
+
+#### 2. Button Widgets
+
+**Submit Button:**
+```dart
+ElevatedButton(
+  onPressed: _submitForm,
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.green[700],
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+  ),
+  child: const Text('Submit'),
+)
+```
+
+**Clear Button:**
+```dart
+OutlinedButton(
+  onPressed: () {
+    _formKey.currentState!.reset();
+    _nameController.clear();
+    _emailController.clear();
+  },
+  child: const Text('Clear Form'),
+)
+```
+
+#### 3. Form Widget & Validation
+
+```dart
+final _formKey = GlobalKey<FormState>();
+
+Form(
+  key: _formKey,
+  child: Column(
+    children: [
+      // TextFormField widgets
+    ],
+  ),
+)
+
+// Validation logic
+void _submitForm() {
+  if (_formKey.currentState!.validate()) {
+    // Form is valid
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Form Submitted Successfully!'),
+        backgroundColor: Colors.green[700],
+      ),
+    );
+    
+    // Show confirmation dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Submission Confirmed'),
+        content: Column(
+          children: [
+            Text('Name: ${_nameController.text}'),
+            Text('Email: ${_emailController.text}'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+### Validation Rules
+
+#### Name Field
+- ❌ Cannot be empty: "Please enter your name"
+- ❌ Must be at least 2 characters: "Name must be at least 2 characters long"
+- ✅ Valid examples: "John Doe", "Alice", "Bob"
+
+#### Email Field
+- ❌ Cannot be empty: "Please enter your email"
+- ❌ Must contain '@': "Enter a valid email address"
+- ❌ Must match email format: "Please enter a valid email format"
+- ✅ Valid examples: "john@example.com", "alice.doe@company.co.uk"
+
+### Testing Guide
+
+#### Test Case 1: Valid Submission
+**Steps:**
+1. Enter Name: "John Doe"
+2. Enter Email: "john@example.com"
+3. Click Submit
+
+**Expected:**
+- ✅ Green SnackBar: "Form Submitted Successfully!"
+- ✅ Confirmation dialog shows submitted data
+- ✅ Form auto-resets after 1 second
+
+#### Test Case 2: Empty Fields
+**Steps:**
+1. Leave fields empty
+2. Click Submit
+
+**Expected:**
+- ❌ Error messages appear below fields
+- ❌ Red SnackBar: "Please fix the errors in the form"
+
+#### Test Case 3: Invalid Email
+**Steps:**
+1. Enter Name: "John Doe"
+2. Enter Email: "invalidemail"
+3. Click Submit
+
+**Expected:**
+- ❌ Error below email field
+- ❌ Form does not submit
+
+#### Test Case 4: Form Reset
+**Steps:**
+1. Enter data in fields
+2. Click "Clear Form"
+
+**Expected:**
+- ✅ All fields cleared
+- ✅ Form ready for new input
+
+### Screenshots Required
+
+Capture these 4 states:
+1. **Empty Form** - Initial state with clean fields
+2. **Validation Errors** - Error messages displayed
+3. **Success SnackBar** - Green notification after submission
+4. **Confirmation Dialog** - Popup showing submitted data
+
+### Navigation
+```dart
+Navigator.pushNamed(context, '/user-input-form');
+```
+
+### Code Location
+**File**: `lib/screens/user_input_form.dart` (240 lines)  
+**Route**: `/user-input-form`
+
+### Reflection
+
+#### Why is input validation important in mobile apps?
+
+Input validation is crucial for several reasons:
+
+1. **Data Integrity**: Ensures data is in the correct format before processing
+2. **User Experience**: Provides immediate feedback, helping users correct mistakes quickly
+3. **Security**: Prevents malicious input and injection attacks
+4. **Error Prevention**: Catches issues before they reach the backend
+5. **Professional Polish**: Shows attention to detail and builds user trust
+6. **Cost Reduction**: Reduces support tickets from invalid data
+
+#### What's the difference between TextField and TextFormField?
+
+| Feature | TextField | TextFormField |
+|---------|-----------|---------------|
+| **Form Integration** | Standalone widget | Works within Form widget |
+| **Validation** | Manual validation needed | Built-in validator property |
+| **State Management** | Manual controller management | Integrated with FormState |
+| **Error Display** | Manual error handling | Automatic error display |
+| **Reset Capability** | Manual clearing required | Can reset via Form.reset() |
+| **Best Use Case** | Simple inputs | Complex forms with multiple fields |
+
+**Example:**
+```dart
+// TextField - Manual validation
+TextField(
+  onChanged: (value) {
+    // Manual validation logic
+  },
+)
+
+// TextFormField - Built-in validation
+TextFormField(
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required';
+    }
+    return null;
+  },
+)
+```
+
+#### How does form state management simplify validation?
+
+Form state management using `GlobalKey<FormState>` provides:
+
+1. **Centralized Control**: Validate all fields with one method call
+   ```dart
+   if (_formKey.currentState!.validate()) {
+     // All fields valid
+   }
+   ```
+
+2. **Automatic Error Handling**: Each field's validator called automatically
+
+3. **Consistent Behavior**: All fields follow same validation pattern
+
+4. **Easy Reset**: Clear all fields with one command
+   ```dart
+   _formKey.currentState!.reset();
+   ```
+
+5. **Scalability**: Adding new fields requires minimal changes
+
+6. **Clean Code**: Reduces boilerplate validation code
+
+### Submission Checklist
+
+#### Before Creating PR:
+- [ ] Code compiles: `flutter analyze`
+- [ ] App runs successfully: `flutter run`
+- [ ] Form validates correctly (test all cases)
+- [ ] Screenshots captured (4 states)
+- [ ] Video recorded (1-2 minutes)
+
+#### Video Demo (1-2 minutes):
+**Content to show:**
+1. Valid submission with success feedback
+2. Validation errors (empty fields, invalid email)
+3. Form reset functionality
+4. Brief code explanation
+
+**Upload to:**
+- Google Drive (set to "Anyone with link" + Edit access)
+- YouTube (unlisted)
+- Loom
+
+#### Pull Request Template:
+
+**Title:** `[Sprint-2] Handling User Input with Forms – [Team Name]`
+
+**Description:**
+```markdown
+## Summary
+Implemented user input form with validation demonstrating TextField, Button, and Form widgets.
+
+## Features
+✅ Name and email validation
+✅ SnackBar feedback (success/error)
+✅ Confirmation dialog
+✅ Form reset functionality
+✅ Material Design 3 styling
+
+## Testing
+All validation scenarios tested and working correctly.
+
+## Screenshots
+[Attach 4 screenshots]
+
+## Video Demo
+[Link to video]
+
+## Reflection
+[Include answers to 3 reflection questions]
+```
+
+#### Commit Message:
+```bash
+git add lib/screens/user_input_form.dart lib/main.dart README.md
+git commit -m "feat: implemented user input form with validation
+
+- Created UserInputForm with name and email validation
+- Added SnackBar and AlertDialog feedback
+- Integrated with app routing
+- Updated README with documentation"
+```
+
+---
+
 ## 🏗️ Stateless vs Stateful Widgets Demo
 
 ### Project Description
