@@ -9,6 +9,7 @@ import 'screens/cart_screen.dart';
 import 'screens/responsive_layout_screen.dart';
 import 'screens/scrollable_views_screen.dart';
 import 'screens/user_input_form.dart';
+import 'screens/state_management_demo.dart';
 import 'services/auth_service.dart';
 import 'services/cart_service.dart';
 import 'screens/home_screen.dart';
@@ -53,6 +54,7 @@ class Farm2HomeApp extends StatelessWidget {
         '/responsive-layout': (context) => const ResponsiveLayoutScreen(),
         '/scrollable-views': (context) => const ScrollableViewsScreen(),
         '/user-input-form': (context) => const UserInputForm(),
+        '/state-management': (context) => const StateManagementDemo(),
       },
     );
   }
