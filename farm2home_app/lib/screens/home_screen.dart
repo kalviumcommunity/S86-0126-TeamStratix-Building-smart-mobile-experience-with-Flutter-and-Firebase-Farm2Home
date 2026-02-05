@@ -120,6 +120,15 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/responsive-form');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.image_search, color: Colors.pink),
+              title: const Text('Assets & Icons'),
+              subtitle: const Text('Managing images and icons in Flutter'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/assets-management');
+              },
+            ),
           ],
         ),
       ),
