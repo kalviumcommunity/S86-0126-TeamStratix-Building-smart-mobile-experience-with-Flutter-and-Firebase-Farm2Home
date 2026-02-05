@@ -84,6 +84,15 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/user-input-form');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.widgets, color: Colors.teal),
+              title: const Text('Reusable Widgets'),
+              subtitle: const Text('Custom widgets for modular design'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/reusable-widgets');
+              },
+            ),
           ],
         ),
       ),
