@@ -16,7 +16,6 @@ class _AnimationsDemoScreenState extends State<AnimationsDemoScreen>
   @override
   void initState() {
     super.initState();
-    // Initialize rotation animation controller
     _rotationController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -38,49 +37,41 @@ class _AnimationsDemoScreenState extends State<AnimationsDemoScreen>
         elevation: 4,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Section 1: AnimatedContainer
             _buildSectionTitle('1. AnimatedContainer (Implicit)'),
             _buildAnimatedContainerDemo(),
             const SizedBox(height: 32),
 
-            // Section 2: AnimatedOpacity
             _buildSectionTitle('2. AnimatedOpacity (Implicit)'),
             _buildAnimatedOpacityDemo(),
             const SizedBox(height: 32),
 
-            // Section 3: AnimatedAlignment
             _buildSectionTitle('3. AnimatedAlign (Implicit)'),
             _buildAnimatedAlignDemo(),
             const SizedBox(height: 32),
 
-            // Section 4: Rotation Animation (Explicit)
             _buildSectionTitle('4. RotationTransition (Explicit)'),
             _buildRotationAnimationDemo(),
             const SizedBox(height: 32),
 
-            // Section 5: Scale Animation (Explicit)
             _buildSectionTitle('5. ScaleTransition (Explicit)'),
             _buildScaleAnimationDemo(),
             const SizedBox(height: 32),
 
-            // Section 6: List Animation
             _buildSectionTitle('6. Staggered List Animation'),
             _buildStaggeredListDemo(),
-            const SizedBox(height: 32),
           ],
         ),
       ),
     );
   }
 
-  /// Section Title Widget
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -91,16 +82,12 @@ class _AnimationsDemoScreenState extends State<AnimationsDemoScreen>
     );
   }
 
-  /// 1. AnimatedContainer Demo
+  /// 1. AnimatedContainer
   Widget _buildAnimatedContainerDemo() {
     return Column(
       children: [
         GestureDetector(
-          onTap: () {
-            setState(() {
-              _isToggled = !_isToggled;
-            });
-          },
+          onTap: () => setState(() => _isToggled = !_isToggled),
           child: AnimatedContainer(
             duration: const Duration(seconds: 1),
             curve: Curves.easeInOut,
@@ -118,7 +105,6 @@ class _AnimationsDemoScreenState extends State<AnimationsDemoScreen>
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
-                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -126,60 +112,42 @@ class _AnimationsDemoScreenState extends State<AnimationsDemoScreen>
         const SizedBox(height: 12),
         Text(
           'Click the box to toggle size and color smoothly',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: Colors.grey[600]),
         ),
       ],
     );
   }
 
-  /// 2. AnimatedOpacity Demo
+  /// 2. AnimatedOpacity
   Widget _buildAnimatedOpacityDemo() {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(8),
+        AnimatedOpacity(
+          opacity: _isToggled ? 1.0 : 0.2,
+          duration: const Duration(seconds: 1),
+          child: Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.green[300],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.eco, size: 60, color: Colors.white),
           ),
-          child: Column(
-            children: [
-              AnimatedOpacity(
-                opacity: _isToggled ? 1.0 : 0.2,
-                duration: const Duration(seconds: 1),
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.green[300],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.eco,
-                    size: 60,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _isToggled = !_isToggled;
-                  });
-                },
-                child: Text(_isToggled ? 'Fade Out' : 'Fade In'),
-              ),
-            ],
-          ),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: () => setState(() => _isToggled = !_isToggled),
+          child: Text(_isToggled ? 'Fade Out' : 'Fade In'),
         ),
       ],
     );
   }
 
-  /// 3. AnimatedAlign Demo
+  /// 3. AnimatedAlign
   Widget _buildAnimatedAlignDemo() {
     return Container(
       height: 200,
@@ -204,49 +172,30 @@ class _AnimationsDemoScreenState extends State<AnimationsDemoScreen>
     );
   }
 
-  /// 4. Rotation Animation Demo (Explicit)
+  /// 4. RotationTransition
   Widget _buildRotationAnimationDemo() {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.purple[50],
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: RotationTransition(
-            turns: _rotationController,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: Colors.purple[400],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.agriculture,
-                size: 50,
-                color: Colors.white,
-              ),
-            ),
-          ),
+    return RotationTransition(
+      turns: _rotationController,
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          color: Colors.purple[400],
+          borderRadius: BorderRadius.circular(12),
         ),
-        const SizedBox(height: 12),
-        Text(
-          'Continuous rotation animation (explicit with AnimationController)',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
-        ),
-      ],
+        child: const Icon(Icons.agriculture, size: 50, color: Colors.white),
+      ),
     );
   }
 
-  /// 5. Scale Animation Demo (Explicit)
+  /// 5. ScaleTransition
   Widget _buildScaleAnimationDemo() {
     return ScaleTransition(
-      scale: Tween<double>(begin: 0.8, end: 1.2).animate(
-        CurvedAnimation(parent: _rotationController, curve: Curves.easeInOut),
+      scale: Tween(begin: 0.8, end: 1.2).animate(
+        CurvedAnimation(
+          parent: _rotationController,
+          curve: Curves.easeInOut,
+        ),
       ),
       child: Container(
         padding: const EdgeInsets.all(20),
@@ -256,27 +205,12 @@ class _AnimationsDemoScreenState extends State<AnimationsDemoScreen>
           border: Border.all(color: Colors.red[300]!),
         ),
         child: Column(
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Colors.red[400],
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.favorite,
-                color: Colors.white,
-                size: 40,
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
+          children: const [
+            Icon(Icons.favorite, size: 48, color: Colors.red),
+            SizedBox(height: 8),
+            Text(
               'Pulsing Scale Animation',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -284,15 +218,20 @@ class _AnimationsDemoScreenState extends State<AnimationsDemoScreen>
     );
   }
 
-  /// 6. Staggered List Animation
+  /// 6. Staggered List Animation (FIXED)
   Widget _buildStaggeredListDemo() {
     final items = ['Fresh Vegetables', 'Organic Fruits', 'Dairy Products'];
+    final icons = [
+      Icons.local_florist,
+      Icons.cake,
+      Icons.local_dairy,
+    ];
+
     return Column(
-      children: List.generate(
-        items.length,
-        (index) => TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.0, end: 1.0),
-          duration: Duration(milliseconds: 300 + (index * 200)),
+      children: List.generate(items.length, (index) {
+        return TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: Duration(milliseconds: 300 + index * 200),
           builder: (context, value, child) {
             return Transform.translate(
               offset: Offset(0, (1 - value) * 50),
@@ -300,20 +239,15 @@ class _AnimationsDemoScreenState extends State<AnimationsDemoScreen>
                 opacity: value,
                 child: Card(
                   margin: const EdgeInsets.only(bottom: 12),
-                  elevation: 4,
                   child: ListTile(
                     leading: Container(
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: Colors.green[index % 2 == 0 ? 400 : 600],
+                        color: Colors.green[400],
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(
-                        [Icons.local_florist, Icons.cake, Icons.shopping_basket]
-                            [index],
-                        color: Colors.white,
-                      ),
+                      child: Icon(icons[index], color: Colors.white),
                     ),
                     title: Text(items[index]),
                     subtitle: const Text('Premium quality'),
@@ -323,8 +257,8 @@ class _AnimationsDemoScreenState extends State<AnimationsDemoScreen>
               ),
             );
           },
-        ),
-      ),
+        );
+      }),
     );
   }
 }
