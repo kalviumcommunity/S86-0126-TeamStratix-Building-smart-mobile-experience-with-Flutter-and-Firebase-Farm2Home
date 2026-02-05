@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/cart_service.dart';
+import '../services/auth_service.dart';
 import 'products_screen.dart';
 
 /// Home screen for Farm2Home app with navigation to demo screens
@@ -10,12 +11,46 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = AuthService().currentUser;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Farm2Home'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Farm2Home'),
+            if (user != null)
+              Text(
+                user.email ?? '',
+                style: const TextStyle(fontSize: 12),
+              ),
+          ],
+        ),
         backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
         actions: [
+          // Logout button
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              try {
+                await AuthService().logout();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Logged out')),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.toString())),
+                  );
+                }
+              }
+            },
+          ),
+
           // Navigation to State Management Demo
           IconButton(
             icon: const Icon(Icons.settings),
