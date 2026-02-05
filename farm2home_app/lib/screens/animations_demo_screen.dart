@@ -224,7 +224,7 @@ class _AnimationsDemoScreenState extends State<AnimationsDemoScreen>
     final icons = [
       Icons.local_florist,
       Icons.cake,
-      Icons.local_dairy,
+      Icons.shopping_basket,
     ];
 
     return Column(
