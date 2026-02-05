@@ -11,6 +11,9 @@ import 'screens/scrollable_views_screen.dart';
 import 'screens/user_input_form.dart';
 import 'screens/state_management_demo.dart';
 import 'screens/reusable_widgets_demo.dart';
+import 'screens/responsive_design_demo.dart';
+import 'screens/responsive_product_grid.dart';
+import 'screens/responsive_form_layout.dart';
 import 'services/auth_service.dart';
 import 'services/cart_service.dart';
 import 'screens/home_screen.dart';
@@ -57,6 +60,9 @@ class Farm2HomeApp extends StatelessWidget {
         '/user-input-form': (context) => const UserInputForm(),
         '/state-management': (context) => const StateManagementDemo(),
         '/reusable-widgets': (context) => const ReusableWidgetsDemo(),
+        '/responsive-design': (context) => const ResponsiveDesignDemo(),
+        '/responsive-product-grid': (context) => const ResponsiveProductGrid(),
+        '/responsive-form': (context) => const ResponsiveFormLayout(),
       },
     );
   }

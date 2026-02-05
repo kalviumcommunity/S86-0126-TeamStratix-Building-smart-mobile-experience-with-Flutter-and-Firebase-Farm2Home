@@ -93,6 +93,33 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/reusable-widgets');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.phone_android, color: Colors.indigo),
+              title: const Text('Responsive Design'),
+              subtitle: const Text('MediaQuery & LayoutBuilder examples'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/responsive-design');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.grid_3x3, color: Colors.cyan),
+              title: const Text('Responsive Grid'),
+              subtitle: const Text('Adaptive product grid layout'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/responsive-product-grid');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.description, color: Colors.amber),
+              title: const Text('Responsive Form'),
+              subtitle: const Text('Adaptive form layouts'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/responsive-form');
+              },
+            ),
           ],
         ),
       ),
