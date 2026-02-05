@@ -15,6 +15,7 @@ import 'screens/responsive_design_demo.dart';
 import 'screens/responsive_product_grid.dart';
 import 'screens/responsive_form_layout.dart';
 import 'screens/assets_management_demo.dart';
+import 'screens/animations_demo_screen.dart';
 import 'services/auth_service.dart';
 import 'services/cart_service.dart';
 import 'screens/home_screen.dart';
@@ -65,9 +66,33 @@ class Farm2HomeApp extends StatelessWidget {
         '/responsive-product-grid': (context) => const ResponsiveProductGrid(),
         '/responsive-form': (context) => const ResponsiveFormLayout(),
         '/assets-management': (context) => const AssetsManagementDemo(),
+        '/animations': (context) => const AnimationsDemoScreen(),
       },
+      onGenerateRoute: (settings) => _createPageTransition(settings),
     );
   }
+}
+
+/// Create page transition with slide animation
+Route<dynamic> _createPageTransition(RouteSettings settings) {
+  return PageRouteBuilder(
+    settings: settings,
+    transitionDuration: const Duration(milliseconds: 500),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return const Scaffold();
+    },
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(1.0, 0.0),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+        ),
+        child: child,
+      );
+    },
+  );
 }
 
 /// Auth wrapper to check if user is logged in
