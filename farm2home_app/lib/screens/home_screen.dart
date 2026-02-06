@@ -209,6 +209,15 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/fcm');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.security, color: Colors.green),
+              title: const Text('Secure Profile'),
+              subtitle: const Text('Auth + Firestore Security Rules'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/secure-profile');
+              },
+            ),
           ],
         ),
       ),
