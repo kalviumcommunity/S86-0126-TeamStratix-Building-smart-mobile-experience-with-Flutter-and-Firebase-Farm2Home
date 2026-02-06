@@ -16,6 +16,7 @@ import 'screens/responsive_product_grid.dart';
 import 'screens/responsive_form_layout.dart';
 import 'screens/assets_management_demo.dart';
 import 'screens/animations_demo_screen.dart';
+import 'screens/firestore_queries_demo_screen.dart';
 import 'services/auth_service.dart';
 import 'services/cart_service.dart';
 import 'screens/home_screen.dart';
@@ -67,6 +68,7 @@ class Farm2HomeApp extends StatelessWidget {
         '/responsive-form': (context) => const ResponsiveFormLayout(),
         '/assets-management': (context) => const AssetsManagementDemo(),
         '/animations': (context) => const AnimationsDemoScreen(),
+        '/firestore-queries': (context) => const FirestoreQueriesDemoScreen(),
       },
       onGenerateRoute: (settings) => _createPageTransition(settings),
     );
