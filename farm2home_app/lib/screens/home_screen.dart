@@ -200,6 +200,15 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/cloud-functions');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.notifications_active, color: Colors.blue),
+              title: const Text('Push Notifications'),
+              subtitle: const Text('Firebase Cloud Messaging (FCM)'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/fcm');
+              },
+            ),
           ],
         ),
       ),

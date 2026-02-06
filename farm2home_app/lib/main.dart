@@ -19,6 +19,7 @@ import 'screens/animations_demo_screen.dart';
 import 'screens/firestore_queries_demo_screen.dart';
 import 'screens/media_upload_screen.dart';
 import 'screens/cloud_functions_demo_screen.dart';
+import 'screens/fcm_demo_screen.dart';
 import 'services/auth_service.dart';
 import 'services/cart_service.dart';
 import 'screens/home_screen.dart';
@@ -73,6 +74,7 @@ class Farm2HomeApp extends StatelessWidget {
         '/firestore-queries': (context) => const FirestoreQueriesDemoScreen(),
         '/media-upload': (context) => const MediaUploadScreen(),
         '/cloud-functions': (context) => const CloudFunctionsDemoScreen(),
+        '/fcm': (context) => const FCMDemoScreen(),
       },
       onGenerateRoute: (settings) => _createPageTransition(settings),
     );
