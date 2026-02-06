@@ -182,6 +182,15 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/firestore-queries');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.cloud_upload, color: Colors.cyan),
+              title: const Text('Media Upload'),
+              subtitle: const Text('Upload images to Firebase Storage'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/media-upload');
+              },
+            ),
           ],
         ),
       ),
