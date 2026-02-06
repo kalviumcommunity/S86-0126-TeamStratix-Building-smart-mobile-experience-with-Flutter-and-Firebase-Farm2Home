@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import '../services/cart_service.dart';
 import 'signup_screen.dart';
-import 'home_screen.dart';
 
-/// Login Screen
+/// Login Screen with Firebase Authentication
+/// Note: Navigation to HomeScreen is handled automatically by AuthWrapper
+/// in main.dart using authStateChanges() stream
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -38,21 +38,21 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text,
       );
 
+      // No need to manually navigate - AuthWrapper's StreamBuilder
+      // will automatically detect the auth state change and navigate to HomeScreen
       if (user != null && mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(cartService: CartService()),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login successful!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 1),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -86,10 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
         );
       }
     }
@@ -126,10 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 10),
                   const Text(
                     'Login to continue shopping',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF5A7A5A),
-                    ),
+                    style: TextStyle(fontSize: 16, color: Color(0xFF5A7A5A)),
                   ),
                   const SizedBox(height: 30),
                   // Email field
@@ -194,9 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: _resetPassword,
                       child: const Text(
                         'Forgot Password?',
-                        style: TextStyle(
-                          color: Color(0xFF4A7C4A),
-                        ),
+                        style: TextStyle(color: Color(0xFF4A7C4A)),
                       ),
                     ),
                   ),
