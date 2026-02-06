@@ -14,7 +14,9 @@ class ProductsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final searchController = TextEditingController();
-    ValueNotifier<List<Product>> filteredProducts = ValueNotifier(sampleProducts);
+    ValueNotifier<List<Product>> filteredProducts = ValueNotifier(
+      sampleProducts,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFFD4EDD4),
@@ -51,7 +53,8 @@ class ProductsScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => CartScreen(cartService: cartService),
+                      builder: (context) =>
+                          CartScreen(cartService: cartService),
                     ),
                   );
                 },
@@ -91,6 +94,23 @@ class ProductsScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
+                // Home button
+                IconButton(
+                  onPressed: () {
+                    // Clear search and reset to all products
+                    searchController.clear();
+                    filteredProducts.value = sampleProducts;
+                  },
+                  icon: const Icon(Icons.home, color: Color(0xFF4A7C4A)),
+                  tooltip: 'Home - Show all products',
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
                     controller: searchController,
@@ -99,12 +119,27 @@ class ProductsScreen extends StatelessWidget {
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
                       fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 0,
+                        horizontal: 16,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
                     ),
+                    onSubmitted: (value) {
+                      final query = value.trim().toLowerCase();
+                      filteredProducts.value = query.isEmpty
+                          ? sampleProducts
+                          : sampleProducts
+                                .where(
+                                  (p) =>
+                                      p.name.toLowerCase().contains(query) ||
+                                      p.category.toLowerCase().contains(query),
+                                )
+                                .toList();
+                    },
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -113,12 +148,21 @@ class ProductsScreen extends StatelessWidget {
                     final query = searchController.text.trim().toLowerCase();
                     filteredProducts.value = query.isEmpty
                         ? sampleProducts
-                        : sampleProducts.where((p) => p.name.toLowerCase().contains(query)).toList();
+                        : sampleProducts
+                              .where(
+                                (p) =>
+                                    p.name.toLowerCase().contains(query) ||
+                                    p.category.toLowerCase().contains(query),
+                              )
+                              .toList();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A7C4A),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 14,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -137,12 +181,13 @@ class ProductsScreen extends StatelessWidget {
                   builder: (context, products, _) {
                     return GridView.builder(
                       padding: const EdgeInsets.all(16),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 1.2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 1.2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
                       itemCount: products.length,
                       itemBuilder: (context, index) {
                         final product = products[index];
@@ -165,7 +210,7 @@ class ProductsScreen extends StatelessWidget {
   void _showProfileMenu(BuildContext context) {
     final authService = AuthService();
     final user = authService.currentUser;
-    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -199,10 +244,7 @@ class ProductsScreen extends StatelessWidget {
                   );
                 }
               },
-              child: const Text(
-                'Logout',
-                style: TextStyle(color: Colors.red),
-              ),
+              child: const Text('Logout', style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -226,9 +268,7 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -237,11 +277,15 @@ class ProductCard extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
               ),
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(4.0), // Less padding around icon
+                  padding: const EdgeInsets.all(
+                    4.0,
+                  ), // Less padding around icon
                   child: Text(
                     product.imageIcon,
                     style: const TextStyle(fontSize: 32),
@@ -276,10 +320,7 @@ class ProductCard extends StatelessWidget {
                 ),
                 Text(
                   product.unit,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
                 const SizedBox(height: 8),
                 SizedBox(
@@ -295,10 +336,7 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                     icon: const Icon(Icons.add_shopping_cart, size: 16),
-                    label: const Text(
-                      'Add',
-                      style: TextStyle(fontSize: 12),
-                    ),
+                    label: const Text('Add', style: TextStyle(fontSize: 12)),
                   ),
                 ),
               ],

@@ -4,7 +4,592 @@
 
 ---
 
-## 🔐 Persistent User Sessions with Firebase Auth (Sprint 2)
+## �️ Firestore Database Schema Design (Sprint 2)
+
+### Overview
+Farm2Home uses Cloud Firestore as its backend database - a fully managed, scalable NoSQL database optimized for real-time mobile experiences. This section documents the complete database structure, including collections, documents, subcollections, and the design decisions behind the schema.
+
+### Why This Schema Design Matters
+- **Scalability**: Designed to handle thousands of products, users, and orders
+- **Performance**: Optimized for common queries (browsing products, viewing orders)
+- **Real-time Ready**: Structure supports live updates for orders and notifications
+- **Maintainability**: Clear, logical organization easy for team to understand
+- **Future-Proof**: Easy to extend with new features (chat, subscriptions, analytics)
+
+---
+
+### Data Requirements List
+
+Farm2Home needs to store and manage:
+
+1. **Users** - Customer profiles, contact info, account settings
+2. **Farmers** - Vendor profiles, farm details, location, certifications
+3. **Products** - Farm products with pricing, inventory, images, ratings
+4. **Orders** - Purchase history, order status, delivery tracking
+5. **Reviews** - Product ratings and customer feedback
+6. **Addresses** - User delivery addresses (multiple per user)
+7. **Categories** - Product categorization and browsing structure
+8. **Notifications** - Order updates, promotions, system messages
+9. **Order Updates** - Status tracking history and timeline
+
+---
+
+### Firestore Schema Structure
+
+#### 📊 Schema Overview
+
+```
+Farm2Home Database
+├── users/                    (Top-level collection)
+│   └── {userId}/
+│       ├── name, email, phone, favorites...
+│       └── addresses/        (Subcollection)
+│           └── {addressId}/
+├── farmers/                  (Top-level collection)
+│   └── {farmerId}/
+│       ├── farmName, location, rating...
+├── products/                 (Top-level collection)
+│   └── {productId}/
+│       ├── name, price, category, stock...
+│       └── reviews/          (Subcollection)
+│           └── {reviewId}/
+├── orders/                   (Top-level collection)
+│   └── {orderId}/
+│       ├── userId, items, total, status...
+│       └── updates/          (Subcollection)
+│           └── {updateId}/
+├── categories/               (Top-level collection)
+│   └── {categoryId}/
+└── notifications/            (Top-level collection)
+    └── {notificationId}/
+```
+
+---
+
+### Collection Details
+
+#### 1. `users` Collection
+
+**Purpose**: Store customer profiles and preferences
+
+**Document Structure**:
+```json
+{
+  "userId": "user_abc123",
+  "name": "Sarah Johnson",
+  "email": "sarah.johnson@example.com",
+  "phoneNumber": "+1234567890",
+  "profileImageUrl": "https://storage.googleapis.com/...",
+  "accountType": "customer",
+  "favorites": ["prod_001", "prod_045"],
+  "createdAt": "2026-02-06T10:30:00Z",
+  "updatedAt": "2026-02-06T10:30:00Z"
+}
+```
+
+**Fields**:
+- `name`: string - Full name
+- `email`: string - Email address
+- `phoneNumber`: string - Contact number
+- `accountType`: string - "customer" or "farmer"
+- `favorites`: array - Product IDs user has favorited
+- `createdAt`: timestamp - Account creation
+- `updatedAt`: timestamp - Last profile update
+
+**Subcollection**: `users/{userId}/addresses` - Multiple delivery addresses
+
+---
+
+#### 2. `users/{userId}/addresses` Subcollection
+
+**Purpose**: Store multiple delivery addresses per user
+
+**Why Subcollection?**
+- Users can have many addresses (home, work, vacation)
+- Addresses don't need to load with every user profile fetch
+- Keeps user document size manageable
+- Easy to add/remove without affecting main profile
+
+**Document Structure**:
+```json
+{
+  "addressId": "addr_xyz789",
+  "label": "Home",
+  "street": "123 Oak Street",
+  "city": "Springfield",
+  "state": "IL",
+  "zipCode": "62701",
+  "country": "USA",
+  "isDefault": true,
+  "deliveryInstructions": "Leave at front door",
+  "createdAt": "2026-02-06T10:35:00Z"
+}
+```
+
+---
+
+#### 3. `farmers` Collection
+
+**Purpose**: Vendor/farmer profiles and farm information
+
+**Document Structure**:
+```json
+{
+  "farmerId": "farm_456",
+  "userId": "user_farmer_001",
+  "farmName": "Green Valley Organic Farm",
+  "description": "Family-owned organic farm",
+  "farmImageUrl": "https://storage.googleapis.com/...",
+  "location": {"latitude": 39.7817, "longitude": -89.6501},
+  "address": "456 Rural Route 1, Springfield, IL",
+  "certifications": ["USDA Organic", "Non-GMO"],
+  "rating": 4.8,
+  "totalReviews": 127,
+  "isVerified": true,
+  "createdAt": "2026-01-15T08:00:00Z"
+}
+```
+
+**Fields**:
+- `userId`: string - Reference to users collection
+- `farmName`: string - Business name
+- `location`: geopoint - For map/distance queries
+- `certifications`: array - Organic, Non-GMO, etc.
+- `rating`: number - Average rating (0-5)
+- `isVerified`: boolean - Admin verification status
+
+---
+
+#### 4. `products` Collection
+
+**Purpose**: All farm products available for purchase
+
+**Document Structure**:
+```json
+{
+  "productId": "prod_001",
+  "name": "Organic Tomatoes",
+  "description": "Fresh, vine-ripened organic tomatoes",
+  "farmerId": "farm_456",
+  "category": "Vegetables",
+  "subcategory": "Fruits",
+  "price": 3.99,
+  "unit": "lb",
+  "stockQuantity": 150,
+  "isAvailable": true,
+  "imageUrls": ["https://storage.googleapis.com/..."],
+  "tags": ["organic", "local", "seasonal"],
+  "nutritionInfo": {"calories": 18, "protein": 0.9},
+  "rating": 4.7,
+  "totalReviews": 45,
+  "totalSales": 523,
+  "createdAt": "2026-01-20T09:00:00Z",
+  "updatedAt": "2026-02-06T08:15:00Z"
+}
+```
+
+**Key Fields**:
+- `farmerId`: string - Which farm sells this
+- `category`: string - Main category (Vegetables, Fruits, Dairy)
+- `stockQuantity`: number - Current inventory
+- `isAvailable`: boolean - In stock and active
+- `tags`: array - Searchable keywords
+- `rating`: number - Aggregate rating from reviews
+
+**Subcollection**: `products/{productId}/reviews` - Customer reviews
+
+---
+
+#### 5. `products/{productId}/reviews` Subcollection
+
+**Purpose**: Customer reviews and ratings for each product
+
+**Why Subcollection?**
+- Popular products may have thousands of reviews
+- Don't want to load all reviews when browsing products
+- Enables pagination ("Load more reviews")
+- Better query performance
+
+**Document Structure**:
+```json
+{
+  "reviewId": "rev_abc123",
+  "userId": "user_abc123",
+  "userName": "Sarah Johnson",
+  "rating": 5,
+  "comment": "Best tomatoes I've ever tasted!",
+  "isVerifiedPurchase": true,
+  "helpfulCount": 12,
+  "images": ["https://storage.googleapis.com/reviews/..."],
+  "createdAt": "2026-02-01T16:45:00Z"
+}
+```
+
+---
+
+#### 6. `orders` Collection
+
+**Purpose**: Customer purchase orders and history
+
+**Why Top-Level Collection?**
+- Admin needs to see all orders across users
+- Farmers need orders containing their products
+- Analytics and reporting require cross-user queries
+
+**Document Structure**:
+```json
+{
+  "orderId": "order_xyz789",
+  "userId": "user_abc123",
+  "orderNumber": "F2H-20260206-001",
+  "status": "confirmed",
+  "items": [
+    {
+      "productId": "prod_001",
+      "productName": "Organic Tomatoes",
+      "quantity": 2,
+      "unit": "lb",
+      "pricePerUnit": 3.99,
+      "totalPrice": 7.98,
+      "farmerId": "farm_456"
+    }
+  ],
+  "subtotal": 10.47,
+  "tax": 0.94,
+  "deliveryFee": 3.99,
+  "totalAmount": 15.40,
+  "deliveryAddress": {
+    "street": "123 Oak Street",
+    "city": "Springfield",
+    "state": "IL",
+    "zipCode": "62701"
+  },
+  "paymentMethod": "credit_card",
+  "paymentStatus": "completed",
+  "estimatedDelivery": "2026-02-08T14:00:00Z",
+  "trackingNumber": "TRACK123456",
+  "createdAt": "2026-02-06T11:30:00Z",
+  "updatedAt": "2026-02-06T11:35:00Z"
+}
+```
+
+**Key Design Decision**: Product name stored in order items (denormalization) so order history remains accurate even if product name changes.
+
+**Subcollection**: `orders/{orderId}/updates` - Status tracking timeline
+
+---
+
+#### 7. `orders/{orderId}/updates` Subcollection
+
+**Purpose**: Track order status changes and delivery progress
+
+**Document Structure**:
+```json
+{
+  "updateId": "upd_001",
+  "status": "confirmed",
+  "message": "Order confirmed by Green Valley Farm",
+  "location": "Farm Warehouse",
+  "updatedBy": "farm_456",
+  "timestamp": "2026-02-06T11:35:00Z"
+}
+```
+
+---
+
+#### 8. `categories` Collection
+
+**Purpose**: Product categorization and browsing structure
+
+**Document Structure**:
+```json
+{
+  "categoryId": "cat_vegetables",
+  "name": "Vegetables",
+  "description": "Fresh vegetables from local farms",
+  "imageUrl": "https://storage.googleapis.com/...",
+  "icon": "🥬",
+  "subcategories": ["Leafy Greens", "Root Vegetables"],
+  "sortOrder": 1,
+  "isActive": true,
+  "createdAt": "2026-01-10T00:00:00Z"
+}
+```
+
+---
+
+#### 9. `notifications` Collection
+
+**Purpose**: User notifications for orders, promotions, system messages
+
+**Document Structure**:
+```json
+{
+  "notificationId": "notif_123",
+  "userId": "user_abc123",
+  "type": "order",
+  "title": "Order Confirmed! 🎉",
+  "message": "Your order F2H-20260206-001 has been confirmed",
+  "imageUrl": "https://storage.googleapis.com/...",
+  "actionUrl": "farm2home://orders/order_xyz789",
+  "isRead": false,
+  "priority": "high",
+  "createdAt": "2026-02-06T11:35:00Z"
+}
+```
+
+---
+
+### Schema Diagram
+
+For a complete visual representation of the database structure, see:
+- **[FIRESTORE_SCHEMA_DIAGRAM.md](FIRESTORE_SCHEMA_DIAGRAM.md)** - Mermaid diagrams, ER diagrams, and relationships
+
+The diagram includes:
+- All collections and subcollections
+- Document fields and data types
+- Reference relationships between collections
+- Data flow patterns
+
+---
+
+### Key Design Decisions
+
+#### 1. When We Used Subcollections
+
+**✅ Reviews** (`products/{id}/reviews`)
+- **Why**: Products can have hundreds/thousands of reviews
+- **Benefit**: Don't load all reviews when browsing products
+- **Performance**: Easy pagination, targeted queries
+
+**✅ Addresses** (`users/{id}/addresses`)
+- **Why**: Users have multiple addresses
+- **Benefit**: Load only when needed, keeps user doc small
+- **Performance**: Independent CRUD operations
+
+**✅ Order Updates** (`orders/{id}/updates`)
+- **Why**: Complete audit trail of status changes
+- **Benefit**: Real-time tracking without re-fetching entire order
+- **Performance**: Order doc stays small even with many updates
+
+#### 2. When We Used Top-Level Collections
+
+**✅ Orders** (not under users)
+- **Why**: Admin needs cross-user queries
+- **Need**: Farmers must see orders with their products
+- **Analytics**: Sales reports, revenue tracking
+
+**✅ Products** (not under farmers)
+- **Why**: Centralized product browsing
+- **Need**: Search across all farms
+- **Performance**: Single query for "all vegetables"
+
+**✅ Farmers** (separate from users)
+- **Why**: Additional business-specific fields
+- **Need**: Farm-specific queries (nearby farms, certified farms)
+- **Flexibility**: User can be both customer and farmer
+
+#### 3. Denormalization Choices
+
+**✅ Product name in order items**
+- **Trade-off**: Slight duplication for accuracy
+- **Why**: Order history must remain accurate even if product renamed
+- **Result**: No need to join products when displaying order history
+
+**✅ User name in reviews**
+- **Trade-off**: Name duplicated across reviews
+- **Why**: Fast display without fetching user document
+- **Result**: Reviews load instantly
+
+**❌ NOT storing entire product in favorites**
+- **Why**: Product details change (price, stock)
+- **Solution**: Store only productId, fetch details when needed
+- **Result**: Always show current product information
+
+---
+
+### Common Queries This Schema Supports
+
+```dart
+// Browse products by category
+firestore.collection('products')
+  .where('category', isEqualTo: 'Vegetables')
+  .where('isAvailable', isEqualTo: true)
+  .orderBy('rating', descending: true)
+  .get();
+
+// Get user's order history
+firestore.collection('orders')
+  .where('userId', isEqualTo: userId)
+  .orderBy('createdAt', descending: true)
+  .limit(20)
+  .get();
+
+// Stream product reviews (real-time)
+firestore.collection('products')
+  .doc(productId)
+  .collection('reviews')
+  .orderBy('createdAt', descending: true)
+  .snapshots();
+
+// Find products from specific farmer
+firestore.collection('products')
+  .where('farmerId', isEqualTo: farmerId)
+  .where('isAvailable', isEqualTo: true)
+  .get();
+
+// Get unread notifications
+firestore.collection('notifications')
+  .where('userId', isEqualTo: userId)
+  .where('isRead', isEqualTo: false)
+  .orderBy('createdAt', descending: true)
+  .get();
+```
+
+---
+
+### Performance & Scalability
+
+#### ✅ What Makes This Schema Scalable?
+
+1. **Subcollections for Large Datasets**
+   - Reviews, addresses, updates use subcollections
+   - Prevents 1MB document size limit
+   - Enables efficient pagination
+
+2. **Indexed Fields**
+   - `userId` in orders (user-specific queries)
+   - `farmerId` in products (farmer dashboard)
+   - `category` in products (browsing)
+   - `status` in orders (filtering)
+
+3. **Smart Denormalization**
+   - Product names in orders (prevents extra reads)
+   - User names in reviews (faster display)
+   - Trade-off: Controlled duplication for performance
+
+4. **Real-time Optimization**
+   - Stream only what's needed
+   - Subcollections enable targeted listeners
+   - `isRead` boolean for efficient notification queries
+
+5. **Avoiding Pitfalls**
+   - ❌ No large arrays (reviews as subcollection, not array)
+   - ❌ No deep nesting (max 2-3 levels)
+   - ✅ Proper use of references vs embedding
+
+---
+
+### Sample Documents for Testing
+
+For complete sample documents for each collection, see:
+- **[FIRESTORE_SCHEMA.md](FIRESTORE_SCHEMA.md)** - Detailed schema with full examples
+
+---
+
+### Reflection
+
+#### Why This Structure?
+
+**1. Separation of Concerns**
+- Users, products, orders, farmers are independent entities
+- Each can be queried, updated, scaled independently
+- Clear boundaries make code maintainable
+
+**2. Query Efficiency**
+- Structured to support app's most common operations
+- Minimizes reads through denormalization
+- Enables real-time features without performance hit
+
+**3. Scalability First**
+- Subcollections prevent document bloat
+- Top-level collections enable cross-entity queries
+- Can handle millions of documents
+
+**4. Real-time Ready**
+- Small, focused documents for live updates
+- Subcollections for targeted listeners
+- Efficient snapshot queries
+
+**5. Developer Experience**
+- Clear, logical naming (lowerCamelCase)
+- Self-documenting structure
+- Easy for new team members to understand
+
+#### Challenges Faced
+
+**1. Denormalization Trade-offs**
+- **Challenge**: Deciding what to duplicate
+- **Solution**: Duplicate only display names, not entire objects
+- **Result**: Fast reads, manageable update complexity
+
+**2. Subcollection vs Array Decision**
+- **Challenge**: Reviews as array or subcollection?
+- **Solution**: Subcollection (scalability wins)
+- **Result**: Products can have unlimited reviews
+
+**3. Order Structure**
+- **Challenge**: Store product references or full details?
+- **Solution**: Hybrid - store IDs + display names
+- **Result**: Fast display + accurate history
+
+**4. Firestore Query Limitations**
+- **Challenge**: No OR queries, limited array queries
+- **Solution**: Structure data to avoid complex queries
+- **Result**: Simple, efficient query patterns
+
+#### What I Learned
+
+**NoSQL is Different**
+- Denormalization is good (in moderation)
+- Design schema around queries, not just entities
+- Document size matters (1MB limit)
+
+**Firestore-Specific Insights**
+- Subcollections are powerful for scalability
+- Timestamps should use `FieldValue.serverTimestamp()`
+- Geopoints enable location-based queries
+- Composite indexes needed for complex queries
+
+**Performance Lessons**
+- Fewer reads = lower costs
+- Denormalize frequently-accessed data
+- Use subcollections for large datasets
+- Stream only what users actually need
+
+**Best Practices Applied**
+- ✅ Clear field naming conventions
+- ✅ Consistent timestamp fields
+- ✅ Boolean fields prefixed with `is`
+- ✅ References stored as strings (IDs)
+- ✅ Arrays limited to reasonable sizes
+
+---
+
+### Future Enhancements
+
+This schema can easily support:
+
+1. **Chat System**: Add `conversations` and `messages` subcollections
+2. **Promotions**: Add `coupons` collection with redemption tracking
+3. **Subscriptions**: Add `subscriptions` for recurring deliveries
+4. **Inventory Management**: Add `inventory` subcollection for farmers
+5. **Analytics**: Structure enables BigQuery export
+6. **Admin Dashboard**: Top-level collections support comprehensive queries
+
+---
+
+### Resources & Documentation
+
+- **Detailed Schema**: [FIRESTORE_SCHEMA.md](FIRESTORE_SCHEMA.md)
+- **Visual Diagrams**: [FIRESTORE_SCHEMA_DIAGRAM.md](FIRESTORE_SCHEMA_DIAGRAM.md)
+- [Firebase Firestore Documentation](https://firebase.google.com/docs/firestore)
+- [Firestore Data Modeling Best Practices](https://firebase.google.com/docs/firestore/manage-data/structure-data)
+- [NoSQL Data Modeling](https://firebase.google.com/docs/firestore/data-model)
+
+---
+
+## �🔐 Persistent User Sessions with Firebase Auth (Sprint 2)
 
 ### Overview
 Modern mobile apps keep users logged in even after closing the app or restarting their device. Firebase Authentication automatically manages session persistence using secure tokens stored on the device. This implementation demonstrates how to build a seamless auto-login flow that detects, stores, and restores user login states across app restarts.
