@@ -218,6 +218,15 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/secure-profile');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.map, color: Colors.blue),
+              title: const Text('Location Preview'),
+              subtitle: const Text('Google Maps Integration'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/location-preview');
+              },
+            ),
           ],
         ),
       ),

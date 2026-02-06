@@ -23,6 +23,7 @@ import 'screens/media_upload_screen.dart';
 import 'screens/cloud_functions_demo_screen.dart';
 import 'screens/fcm_demo_screen.dart';
 import 'screens/secure_profile_screen.dart';
+import 'screens/location_preview_screen.dart';
 import 'screens/splash_screen.dart';
 
 import 'services/auth_service.dart';
@@ -94,6 +95,8 @@ class Farm2HomeApp extends StatelessWidget {
             const FCMDemoScreen(),
         '/secure-profile': (context) =>
             const SecureProfileScreen(),
+        '/location-preview': (context) =>
+            const LocationPreviewScreen(),
       },
       onGenerateRoute: (settings) =>
           _createPageTransition(settings),
