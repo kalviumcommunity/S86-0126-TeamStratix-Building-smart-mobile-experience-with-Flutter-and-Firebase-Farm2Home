@@ -31,9 +31,6 @@ class _LocationPreviewScreenState extends State<LocationPreviewScreen> {
   bool _isLoadingLocation = false;
   String _locationStatus = 'Tap "Locate Me" to fetch your location';
 
-  // Map style data
-  bool _isDarkMode = false;
-
   @override
   void initState() {
     super.initState();
@@ -53,7 +50,7 @@ class _LocationPreviewScreenState extends State<LocationPreviewScreen> {
           title: 'Farm2Home Hub',
           snippet: 'San Francisco Distribution Center',
         ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        icon: BitmapDescriptor.defaultMarker,
       ),
     );
 
@@ -66,7 +63,7 @@ class _LocationPreviewScreenState extends State<LocationPreviewScreen> {
           title: 'Local Farm',
           snippet: 'Sacramento Region - Produce Source',
         ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+        icon: BitmapDescriptor.defaultMarker,
       ),
     );
 
@@ -79,7 +76,7 @@ class _LocationPreviewScreenState extends State<LocationPreviewScreen> {
           title: 'Distribution Market',
           snippet: 'San Jose Area - Customer Hub',
         ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        icon: BitmapDescriptor.defaultMarker,
       ),
     );
   }
@@ -98,7 +95,7 @@ class _LocationPreviewScreenState extends State<LocationPreviewScreen> {
           title: 'Your Location',
           snippet: 'Your current GPS position',
         ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        icon: BitmapDescriptor.defaultMarker,
       ),
     );
   }
@@ -259,7 +256,6 @@ class _LocationPreviewScreenState extends State<LocationPreviewScreen> {
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         title: const Text('Location Preview'),
-        subtitle: const Text('User Location + Map Markers'),
         backgroundColor: Colors.green.shade700,
         elevation: 0,
       ),
@@ -578,34 +574,7 @@ class _LocationPreviewScreenState extends State<LocationPreviewScreen> {
     );
   }
 
-  /// Build navigation button
-  Widget _buildNavigationButton(
-    String label,
-    LatLng location,
-    Color color,
-  ) {
-    return ElevatedButton.icon(
-      onPressed: () => _navigateToLocation(location, label),
-      icon: const Icon(Icons.my_location, size: 16),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-    );
-  }
 
-  /// Build reset button
-  Widget _buildResetButton() {
-    return OutlinedButton.icon(
-      onPressed: _resetToDefaultLocation,
-      icon: const Icon(Icons.refresh, size: 16),
-      label: const Text('Reset'),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-    );
-  }
 
   /// Build configuration item
   Widget _buildConfigItem(String platform, String location) {

@@ -89,9 +89,10 @@ class LocationService {
     int distanceFilter = 10, // Minimum distance change before update (in meters)
   }) {
     return Geolocator.getPositionStream(
-      accuracyFilter: accuracy,
-      distanceFilter: distanceFilter,
-      timeInterval: 1000, // Update every 1 second
+      locationSettings: LocationSettings(
+        accuracy: accuracy,
+        distanceFilter: distanceFilter,
+      ),
     );
   }
 
