@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 
 import 'screens/login_screen.dart';
@@ -26,8 +27,11 @@ import 'screens/secure_profile_screen.dart';
 import 'screens/location_preview_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/my_notes_screen.dart';
+import 'screens/products_favorites_screen.dart';
+import 'screens/favorites_sync_screen.dart';
 
 import 'services/cart_service.dart';
+import 'providers/favorites_provider.dart';
 
 import 'screens/home_screen.dart';
 
@@ -37,7 +41,17 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const Farm2HomeApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        // Favorites Provider - Global state available across all screens
+        ChangeNotifierProvider(
+          create: (context) => FavoritesProvider(),
+        ),
+      ],
+      child: const Farm2HomeApp(),
+    ),
+  );
 }
 
 /// Root widget of the Farm2Home application
@@ -99,6 +113,10 @@ class Farm2HomeApp extends StatelessWidget {
             const LocationPreviewScreen(),
         '/my-notes': (context) =>
             const MyNotesScreen(),
+        '/products-favorites': (context) =>
+            const ProductsScreenFavorites(),
+        '/favorites-sync': (context) =>
+            const FavoritesScreenSync(),
       },
       onGenerateRoute: (settings) =>
           _createPageTransition(settings),
