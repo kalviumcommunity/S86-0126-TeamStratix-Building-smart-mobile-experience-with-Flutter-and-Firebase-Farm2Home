@@ -7,6 +7,11 @@ class Product {
   final String unit;
   final String category;
   final String imageIcon;
+  final bool isAvailable;
+  final int stock;
+  final String farmerId;
+  final double rating;
+  final int reviewCount;
 
   Product({
     required this.id,
@@ -16,7 +21,48 @@ class Product {
     required this.unit,
     required this.category,
     required this.imageIcon,
+    this.isAvailable = true,
+    this.stock = 0,
+    this.farmerId = '',
+    this.rating = 0.0,
+    this.reviewCount = 0,
   });
+
+  /// Create Product from Firestore document
+  factory Product.fromFirestore(Map<String, dynamic> data) {
+    return Product(
+      id: data['id'] ?? '',
+      name: data['name'] ?? '',
+      description: data['description'] ?? '',
+      price: (data['price'] ?? 0.0).toDouble(),
+      unit: data['unit'] ?? '',
+      category: data['category'] ?? '',
+      imageIcon: data['imageIcon'] ?? '🌱',
+      isAvailable: data['isAvailable'] ?? true,
+      stock: data['stock'] ?? 0,
+      farmerId: data['farmerId'] ?? '',
+      rating: (data['rating'] ?? 0.0).toDouble(),
+      reviewCount: data['reviewCount'] ?? 0,
+    );
+  }
+
+  /// Convert Product to Firestore map
+  Map<String, dynamic> toFirestore() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'price': price,
+      'unit': unit,
+      'category': category,
+      'imageIcon': imageIcon,
+      'isAvailable': isAvailable,
+      'stock': stock,
+      'farmerId': farmerId,
+      'rating': rating,
+      'reviewCount': reviewCount,
+    };
+  }
 }
 
 /// Sample products data - Comprehensive vegetable and produce list

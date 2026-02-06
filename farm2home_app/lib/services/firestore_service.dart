@@ -82,10 +82,7 @@ class FirestoreService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => {
-                'id': doc.id,
-                ...doc.data(),
-              })
+          .map((doc) => {'id': doc.id, ...doc.data()})
           .toList();
     } catch (e) {
       throw 'Failed to get orders: $e';
@@ -157,6 +154,205 @@ class FirestoreService {
       return [];
     } catch (e) {
       throw 'Failed to get favorites: $e';
+    }
+  }
+
+  // ========== PRODUCT READ OPERATIONS ==========
+
+  /// Get all products (one-time read)
+  Future<List<Map<String, dynamic>>> getAllProducts() async {
+    try {
+      final querySnapshot = await _firestore.collection('products').get();
+      return querySnapshot.docs
+          .map((doc) => {'id': doc.id, ...doc.data()})
+          .toList();
+    } catch (e) {
+      throw 'Failed to get products: $e';
+    }
+  }
+
+  /// Stream all products (real-time updates)
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamAllProducts() {
+    return _firestore.collection('products').snapshots();
+  }
+
+  /// Get single product by ID
+  Future<Map<String, dynamic>?> getProductById(String productId) async {
+    try {
+      final doc = await _firestore.collection('products').doc(productId).get();
+      if (doc.exists) {
+        return {'id': doc.id, ...doc.data()!};
+      }
+      return null;
+    } catch (e) {
+      throw 'Failed to get product: $e';
+    }
+  }
+
+  /// Stream single product by ID (real-time)
+  Stream<DocumentSnapshot<Map<String, dynamic>>> streamProductById(
+    String productId,
+  ) {
+    return _firestore.collection('products').doc(productId).snapshots();
+  }
+
+  /// Get products by category (with query)
+  Future<List<Map<String, dynamic>>> getProductsByCategory(
+    String category,
+  ) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('products')
+          .where('category', isEqualTo: category)
+          .get();
+      return querySnapshot.docs
+          .map((doc) => {'id': doc.id, ...doc.data()})
+          .toList();
+    } catch (e) {
+      throw 'Failed to get products by category: $e';
+    }
+  }
+
+  /// Stream products by category (real-time)
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamProductsByCategory(
+    String category,
+  ) {
+    return _firestore
+        .collection('products')
+        .where('category', isEqualTo: category)
+        .snapshots();
+  }
+
+  /// Get available products only
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamAvailableProducts() {
+    return _firestore
+        .collection('products')
+        .where('isAvailable', isEqualTo: true)
+        .orderBy('name')
+        .snapshots();
+  }
+
+  /// Search products by name (contains query)
+  Future<List<Map<String, dynamic>>> searchProducts(String searchTerm) async {
+    try {
+      // Firestore doesn't support full-text search, so we get all and filter
+      final querySnapshot = await _firestore.collection('products').get();
+      final searchLower = searchTerm.toLowerCase();
+
+      return querySnapshot.docs
+          .where((doc) {
+            final data = doc.data();
+            final name = (data['name'] ?? '').toString().toLowerCase();
+            final category = (data['category'] ?? '').toString().toLowerCase();
+            return name.contains(searchLower) || category.contains(searchLower);
+          })
+          .map((doc) => {'id': doc.id, ...doc.data()})
+          .toList();
+    } catch (e) {
+      throw 'Failed to search products: $e';
+    }
+  }
+
+  // ========== CATEGORY READ OPERATIONS ==========
+
+  /// Get all categories
+  Future<List<Map<String, dynamic>>> getAllCategories() async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('categories')
+          .orderBy('sortOrder')
+          .get();
+      return querySnapshot.docs
+          .map((doc) => {'id': doc.id, ...doc.data()})
+          .toList();
+    } catch (e) {
+      throw 'Failed to get categories: $e';
+    }
+  }
+
+  /// Stream all categories (real-time)
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamAllCategories() {
+    return _firestore.collection('categories').orderBy('sortOrder').snapshots();
+  }
+
+  /// Get active categories only
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamActiveCategories() {
+    return _firestore
+        .collection('categories')
+        .where('isActive', isEqualTo: true)
+        .orderBy('sortOrder')
+        .snapshots();
+  }
+
+  // ========== PRODUCT REVIEWS READ OPERATIONS ==========
+
+  /// Get reviews for a product
+  Future<List<Map<String, dynamic>>> getProductReviews(String productId) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('products')
+          .doc(productId)
+          .collection('reviews')
+          .orderBy('createdAt', descending: true)
+          .get();
+      return querySnapshot.docs
+          .map((doc) => {'id': doc.id, ...doc.data()})
+          .toList();
+    } catch (e) {
+      throw 'Failed to get reviews: $e';
+    }
+  }
+
+  /// Stream product reviews (real-time)
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamProductReviews(
+    String productId,
+  ) {
+    return _firestore
+        .collection('products')
+        .doc(productId)
+        .collection('reviews')
+        .orderBy('createdAt', descending: true)
+        .snapshots();
+  }
+
+  // ========== SEED DATA HELPER ==========
+
+  /// Add sample products to Firestore (for testing)
+  Future<void> seedProducts(List<Map<String, dynamic>> products) async {
+    try {
+      final batch = _firestore.batch();
+
+      for (var product in products) {
+        final docRef = _firestore.collection('products').doc(product['id']);
+        batch.set(docRef, {
+          ...product,
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      await batch.commit();
+    } catch (e) {
+      throw 'Failed to seed products: $e';
+    }
+  }
+
+  /// Add sample categories to Firestore
+  Future<void> seedCategories(List<Map<String, dynamic>> categories) async {
+    try {
+      final batch = _firestore.batch();
+
+      for (var category in categories) {
+        final docRef = _firestore.collection('categories').doc(category['id']);
+        batch.set(docRef, {
+          ...category,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      await batch.commit();
+    } catch (e) {
+      throw 'Failed to seed categories: $e';
     }
   }
 }

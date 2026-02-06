@@ -1946,6 +1946,448 @@ Stream<DocumentSnapshot<Map<String, dynamic>>> streamUserData(String uid) {
 }
 ```
 
+---
+
+## 🔄 Firestore Read Operations & Live Data Display (Sprint 3)
+
+### Overview
+Farm2Home now implements comprehensive Firestore read operations with real-time data streaming using `StreamBuilder`. Products are fetched directly from Cloud Firestore and updates automatically reflect in the UI without page refresh.
+
+### Architecture Components
+
+#### 1. **Enhanced Product Model** (`lib/models/product.dart`)
+The Product model now includes Firestore serialization methods:
+
+```dart
+class Product {
+  final String id;
+  final String name;
+  final String description;
+  final double price;
+  final String unit;
+  final String category;
+  final String imageIcon;
+  final bool isAvailable;
+  final int stock;
+  final String farmerId;
+  final double rating;
+  final int reviewCount;
+
+  Product({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.unit,
+    required this.category,
+    required this.imageIcon,
+    this.isAvailable = true,
+    this.stock = 0,
+    this.farmerId = '',
+    this.rating = 0.0,
+    this.reviewCount = 0,
+  });
+
+  /// Create Product from Firestore document
+  factory Product.fromFirestore(Map<String, dynamic> data) {
+    return Product(
+      id: data['id'] ?? '',
+      name: data['name'] ?? '',
+      description: data['description'] ?? '',
+      price: (data['price'] ?? 0.0).toDouble(),
+      unit: data['unit'] ?? '',
+      category: data['category'] ?? '',
+      imageIcon: data['imageIcon'] ?? '🌱',
+      isAvailable: data['isAvailable'] ?? true,
+      stock: data['stock'] ?? 0,
+      farmerId: data['farmerId'] ?? '',
+      rating: (data['rating'] ?? 0.0).toDouble(),
+      reviewCount: data['reviewCount'] ?? 0,
+    );
+  }
+
+  /// Convert Product to Firestore map
+  Map<String, dynamic> toFirestore() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'price': price,
+      'unit': unit,
+      'category': category,
+      'imageIcon': imageIcon,
+      'isAvailable': isAvailable,
+      'stock': stock,
+      'farmerId': farmerId,
+      'rating': rating,
+      'reviewCount': reviewCount,
+    };
+  }
+}
+```
+
+#### 2. **Firestore Service Extensions** (`lib/services/firestore_service.dart`)
+
+##### Product Read Operations
+```dart
+// Get all products (one-time read)
+Future<List<Map<String, dynamic>>> getAllProducts() async {
+  final querySnapshot = await _firestore.collection('products').get();
+  return querySnapshot.docs
+      .map((doc) => {'id': doc.id, ...doc.data()})
+      .toList();
+}
+
+// Stream all products (real-time updates)
+Stream<QuerySnapshot<Map<String, dynamic>>> streamAllProducts() {
+  return _firestore.collection('products').snapshots();
+}
+
+// Get single product by ID
+Future<Map<String, dynamic>?> getProductById(String productId) async {
+  final doc = await _firestore.collection('products').doc(productId).get();
+  if (doc.exists) {
+    return {'id': doc.id, ...doc.data()!};
+  }
+  return null;
+}
+
+// Stream single product (real-time)
+Stream<DocumentSnapshot<Map<String, dynamic>>> streamProductById(String productId) {
+  return _firestore.collection('products').doc(productId).snapshots();
+}
+
+// Get products by category
+Future<List<Map<String, dynamic>>> getProductsByCategory(String category) async {
+  final querySnapshot = await _firestore
+      .collection('products')
+      .where('category', isEqualTo: category)
+      .get();
+  return querySnapshot.docs
+      .map((doc) => {'id': doc.id, ...doc.data()})
+      .toList();
+}
+
+// Stream available products only
+Stream<QuerySnapshot<Map<String, dynamic>>> streamAvailableProducts() {
+  return _firestore
+      .collection('products')
+      .where('isAvailable', isEqualTo: true)
+      .orderBy('name')
+      .snapshots();
+}
+
+// Search products by name/category
+Future<List<Map<String, dynamic>>> searchProducts(String searchTerm) async {
+  final querySnapshot = await _firestore.collection('products').get();
+  final searchLower = searchTerm.toLowerCase();
+
+  return querySnapshot.docs
+      .where((doc) {
+        final data = doc.data();
+        final name = (data['name'] ?? '').toString().toLowerCase();
+        final category = (data['category'] ?? '').toString().toLowerCase();
+        return name.contains(searchLower) || category.contains(searchLower);
+      })
+      .map((doc) => {'id': doc.id, ...doc.data()})
+      .toList();
+}
+```
+
+##### Category Read Operations
+```dart
+// Get all categories
+Future<List<Map<String, dynamic>>> getAllCategories() async {
+  final querySnapshot = await _firestore
+      .collection('categories')
+      .orderBy('sortOrder')
+      .get();
+  return querySnapshot.docs
+      .map((doc) => {'id': doc.id, ...doc.data()})
+      .toList();
+}
+
+// Stream active categories
+Stream<QuerySnapshot<Map<String, dynamic>>> streamActiveCategories() {
+  return _firestore
+      .collection('categories')
+      .where('isActive', isEqualTo: true)
+      .orderBy('sortOrder')
+      .snapshots();
+}
+```
+
+##### Product Reviews
+```dart
+// Get reviews for a product
+Future<List<Map<String, dynamic>>> getProductReviews(String productId) async {
+  final querySnapshot = await _firestore
+      .collection('products')
+      .doc(productId)
+      .collection('reviews')
+      .orderBy('createdAt', descending: true)
+      .get();
+  return querySnapshot.docs
+      .map((doc) => {'id': doc.id, ...doc.data()})
+      .toList();
+}
+
+// Stream product reviews (real-time)
+Stream<QuerySnapshot<Map<String, dynamic>>> streamProductReviews(String productId) {
+  return _firestore
+      .collection('products')
+      .doc(productId)
+      .collection('reviews')
+      .orderBy('createdAt', descending: true)
+      .snapshots();
+}
+```
+
+#### 3. **StreamBuilder Implementation** (`lib/screens/products_screen.dart`)
+
+The products screen now uses `StreamBuilder` to display live data:
+
+```dart
+class _ProductsScreenState extends State<ProductsScreen> {
+  final FirestoreService _firestoreService = FirestoreService();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          // Search bar
+          _buildSearchBar(),
+          
+          // Products grid with StreamBuilder
+          Expanded(
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: _firestoreService.streamAvailableProducts(),
+              builder: (context, snapshot) {
+                // Loading state
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                // Error state
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  );
+                }
+
+                // No data state
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: ElevatedButton(
+                      onPressed: () => _showSeedDataDialog(context),
+                      child: const Text('Seed Sample Data'),
+                    ),
+                  );
+                }
+
+                // Convert Firestore documents to Product objects
+                List<Product> allProducts = snapshot.data!.docs
+                    .map((doc) => Product.fromFirestore(doc.data()))
+                    .toList();
+
+                // Apply search filter
+                List<Product> filteredProducts = _searchQuery.isEmpty
+                    ? allProducts
+                    : allProducts
+                        .where((p) =>
+                            p.name.toLowerCase().contains(_searchQuery) ||
+                            p.category.toLowerCase().contains(_searchQuery))
+                        .toList();
+
+                // Display products grid
+                return GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 1.2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: filteredProducts.length,
+                  itemBuilder: (context, index) {
+                    final product = filteredProducts[index];
+                    return ProductCard(
+                      product: product,
+                      onAddToCart: () => widget.cartService.addToCart(product),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+#### 4. **Seed Data Helper** (`lib/services/seed_data.dart`)
+
+Helper functions to populate Firestore with sample data:
+
+```dart
+/// Convert Product objects to Firestore-compatible maps
+List<Map<String, dynamic>> productsToFirestoreData(List<Product> products) {
+  return products.map((product) {
+    return {
+      'id': product.id,
+      'name': product.name,
+      'description': product.description,
+      'price': product.price,
+      'unit': product.unit,
+      'category': product.category,
+      'imageIcon': product.imageIcon,
+      'isAvailable': true,
+      'stock': 100,
+      'farmerId': 'seed_farmer_001',
+      'rating': 4.5,
+      'reviewCount': 0,
+    };
+  }).toList();
+}
+
+/// Seed Firestore with sample data
+Future<void> seedFirestoreData() async {
+  final firestoreService = FirestoreService();
+
+  // Seed categories first
+  final categories = getSampleCategories();
+  await firestoreService.seedCategories(categories);
+
+  // Seed products (55 items)
+  final products = productsToFirestoreData(sampleProducts);
+  await firestoreService.seedProducts(products);
+}
+```
+
+### Usage Workflow
+
+1. **First Launch**: When the app loads with empty database
+   - StreamBuilder shows "No products available" message
+   - User clicks "Seed Sample Data" button
+   - System populates Firestore with 55 products and 4 categories
+   - StreamBuilder automatically detects new data and displays products
+
+2. **Subsequent Launches**: 
+   - StreamBuilder listens to `streamAvailableProducts()`
+   - Products load instantly from Firestore
+   - Any changes (new products, price updates) reflect immediately
+   - Search filter applies client-side on live data
+
+3. **Real-time Updates**:
+   - If admin adds product → appears in all user screens instantly
+   - If farmer updates stock → reflected without page refresh
+   - If product becomes unavailable → automatically hidden from view
+
+### StreamBuilder vs FutureBuilder
+
+#### Why StreamBuilder?
+```dart
+// StreamBuilder - Real-time updates
+StreamBuilder<QuerySnapshot>(
+  stream: _firestoreService.streamAvailableProducts(),
+  builder: (context, snapshot) {
+    // Rebuilds automatically when data changes
+  },
+)
+```
+
+#### When to use FutureBuilder?
+```dart
+// FutureBuilder - One-time fetch
+FutureBuilder<List<Product>>(
+  future: _firestoreService.getAllProducts(),
+  builder: (context, snapshot) {
+    // Fetches once, no auto-updates
+  },
+)
+```
+
+### Performance Considerations
+
+1. **Query Optimization**
+   - Use `.where('isAvailable', isEqualTo: true)` to filter server-side
+   - Order by name for consistent display: `.orderBy('name')`
+   - Limit results for pagination: `.limit(20)`
+
+2. **Offline Support**
+   - Firestore caches data automatically
+   - App works offline with cached products
+   - Changes sync when connection restored
+
+3. **Real-time Listener Management**
+   - StreamBuilder auto-manages subscription lifecycle
+   - Listener attached when widget builds
+   - Auto-detached when widget disposes
+
+### Firestore Security Rules
+
+Ensure your Firestore rules allow read access:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Products readable by all, writable by farmers only
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null 
+        && exists(/databases/$(database)/documents/farmers/$(request.auth.uid));
+    }
+    
+    // Categories readable by all
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
+```
+
+### Testing Checklist
+
+- [x] Products load from Firestore on app launch
+- [x] Empty state displays seed data button
+- [x] Seed data populates 55 products successfully
+- [x] Products display in grid layout
+- [x] Search filters products by name and category
+- [x] Home button clears search and shows all products
+- [x] Real-time updates reflect immediately
+- [x] Loading indicator shows during initial fetch
+- [x] Error handling displays retry button
+- [x] Cart functionality works with Firestore products
+
+### Key Benefits Achieved
+
+1. **✅ Real-time Data**: Products update across all devices instantly
+2. **✅ Scalability**: Database handles thousands of products efficiently
+3. **✅ Offline Support**: App works without internet using cache
+4. **✅ Search Performance**: Client-side filtering on live stream
+5. **✅ Developer Experience**: Clean service layer with clear separation
+6. **✅ Type Safety**: Product.fromFirestore() ensures data integrity
+
+### Next Steps
+
+- Add pagination for large product catalogs (`.limit()` and `.startAfter()`)
+- Implement category filtering with server-side queries
+- Add product detail screen with reviews subcollection
+- Create farmer dashboard for product management
+- Add analytics tracking for product views
+- Implement favoriting with user-specific streams
+
+---
+
 ## 🚀 Running the App
 
 ### Web (Chrome)
