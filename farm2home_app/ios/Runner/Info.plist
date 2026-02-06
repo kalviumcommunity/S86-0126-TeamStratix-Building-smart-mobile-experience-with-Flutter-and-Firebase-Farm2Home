@@ -45,5 +45,10 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Location permissions for GPS access -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs to access your location to show it on the map and help you find nearby farms and markets.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs to access your location to show it on the map and help you find nearby farms and markets.</string>
 </dict>
 </plist>
