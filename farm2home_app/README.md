@@ -2482,6 +2482,711 @@ orders/
 - Analytics for user behavior tracking
 - Cloud Functions for backend logic
 
+---
+
+## ✍️ Firestore Write & Update Operations (Sprint 4)
+
+### Overview
+Farm2Home now implements comprehensive Firestore write operations to allow farmers to **create, update, and manage** their product listings. This implementation follows secure, structured practices with proper validation and error handling.
+
+### Why Write Operations Matter
+
+**Data Integrity**: Validation prevents corrupt or incomplete data from entering the database  
+**Security**: User authentication ensures only authorized farmers can modify products  
+**Scalability**: Batch operations handle multiple updates efficiently  
+**Real-time Sync**: Changes appear instantly across all connected devices  
+**Audit Trail**: Timestamps track when products are created and modified
+
+---
+
+### Understanding Firestore Write Operations
+
+Firestore supports four main types of write operations:
+
+#### 1. **Add** - Create with Auto-Generated ID
+Creates a new document with a Firestore-generated unique ID.
+
+```dart
+Future<String> addProduct(Map<String, dynamic> productData) async {
+  final docRef = await FirebaseFirestore.instance
+      .collection('products')
+      .add({
+        ...productData,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+  
+  return docRef.id; // Returns: "xK3mP9rQ2nL8jH5fD1wS"
+}
+```
+
+**When to use:**
+- Creating new products, orders, reviews
+- When you don't need to control the document ID
+- Most common for user-generated content
+
+#### 2. **Set** - Write with Specific ID
+Writes to a specific document ID, **overwriting** all existing data.
+
+```dart
+Future<void> setProduct(String productId, Map<String, dynamic> productData) async {
+  await FirebaseFirestore.instance
+      .collection('products')
+      .doc(productId)
+      .set({
+        ...productData,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+}
+```
+
+**When to use:**
+- Creating documents with specific IDs (e.g., user profiles with UID)
+- Completely replacing document data
+- Initializing known documents
+
+**⚠️ Warning:** Overwrites all fields! Use with caution.
+
+#### 3. **Set with Merge** - Partial Update Without Overwriting
+Writes specific fields without removing existing data.
+
+```dart
+Future<void> setProductMerge(String productId, Map<String, dynamic> updates) async {
+  await FirebaseFirestore.instance
+      .collection('products')
+      .doc(productId)
+      .set({
+        ...updates,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true)); // merge: true preserves existing fields
+}
+```
+
+**When to use:**
+- Updating only specific fields
+- Safer than regular `set()`
+- Creating or updating in one operation
+
+#### 4. **Update** - Modify Specific Fields
+Updates only the specified fields, **fails if document doesn't exist**.
+
+```dart
+Future<void> updateProduct(String productId, Map<String, dynamic> updates) async {
+  await FirebaseFirestore.instance
+      .collection('products')
+      .doc(productId)
+      .update({
+        ...updates,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+}
+```
+
+**When to use:**
+- Modifying existing products
+- Changing price, stock, availability
+- Most common for edit operations
+
+**⚠️ Error:** Throws exception if document doesn't exist!
+
+---
+
+### Comparison: Add vs Set vs Update
+
+| Operation | Creates New? | Overwrites? | Needs ID? | Fails if Missing? |
+|-----------|-------------|-------------|-----------|-------------------|
+| **add()** | ✅ Yes | N/A | ❌ Auto | N/A |
+| **set()** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No |
+| **set(merge: true)** | ✅ Yes | ❌ No | ✅ Yes | ❌ No |
+| **update()** | ❌ No | ❌ No | ✅ Yes | ✅ Yes |
+
+---
+
+### Implementation in Farm2Home
+
+#### 1. **FirestoreService Write Methods** (`lib/services/firestore_service.dart`)
+
+We've added **20+ write operations** to the service:
+
+##### Product Write Operations
+
+```dart
+// Add new product (auto ID)
+Future<String> addProduct(Map<String, dynamic> productData) async {
+  // Validates: name, price, category required
+  final docRef = await _firestore.collection('products').add({
+    ...productData,
+    'createdAt': FieldValue.serverTimestamp(),
+    'updatedAt': FieldValue.serverTimestamp(),
+  });
+  return docRef.id;
+}
+
+// Set product with specific ID
+Future<void> setProduct(String productId, Map<String, dynamic> productData) async {
+  // Overwrites entire document
+  await _firestore.collection('products').doc(productId).set({
+    ...productData,
+    'createdAt': FieldValue.serverTimestamp(),
+    'updatedAt': FieldValue.serverTimestamp(),
+  });
+}
+
+// Set with merge (partial update)
+Future<void> setProductMerge(String productId, Map<String, dynamic> updates) async {
+  // Updates only specified fields
+  await _firestore.collection('products').doc(productId).set({
+    ...updates,
+    'updatedAt': FieldValue.serverTimestamp(),
+  }, SetOptions(merge: true));
+}
+
+// Update specific fields
+Future<void> updateProduct(String productId, Map<String, dynamic> updates) async {
+  // Check if document exists
+  final doc = await _firestore.collection('products').doc(productId).get();
+  if (!doc.exists) throw 'Product not found';
+  
+  await _firestore.collection('products').doc(productId).update({
+    ...updates,
+    'updatedAt': FieldValue.serverTimestamp(),
+  });
+}
+
+// Update specific operations
+Future<void> updateProductStock(String productId, int newStock) async { ... }
+Future<void> updateProductPrice(String productId, double newPrice) async { ... }
+Future<void> updateProductAvailability(String productId, bool isAvailable) async { ... }
+
+// Delete product
+Future<void> deleteProduct(String productId) async {
+  await _firestore.collection('products').doc(productId).delete();
+}
+
+// Batch update multiple products
+Future<void> batchUpdateProducts(Map<String, Map<String, dynamic>> updates) async {
+  final batch = _firestore.batch();
+  updates.forEach((productId, updateData) {
+    final docRef = _firestore.collection('products').doc(productId);
+    batch.update(docRef, {
+      ...updateData,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  });
+  await batch.commit();
+}
+```
+
+#### 2. **Product Management UI** (`lib/screens/product_management_screen.dart`)
+
+Form with comprehensive validation:
+
+```dart
+class ProductManagementScreen extends StatefulWidget {
+  final Product? productToEdit; // null = add mode, non-null = edit mode
+  
+  const ProductManagementScreen({super.key, this.productToEdit});
+}
+
+// Form Controllers
+final TextEditingController _nameController = TextEditingController();
+final TextEditingController _descriptionController = TextEditingController();
+final TextEditingController _priceController = TextEditingController();
+final TextEditingController _unitController = TextEditingController();
+final TextEditingController _stockController = TextEditingController();
+
+// Validation Example
+TextFormField(
+  controller: _nameController,
+  decoration: const InputDecoration(
+    labelText: 'Product Name *',
+    hintText: 'e.g., Fresh Organic Tomatoes',
+  ),
+  validator: (value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Product name is required';
+    }
+    if (value.trim().length < 3) {
+      return 'Name must be at least 3 characters';
+    }
+    return null;
+  },
+)
+
+// Save Operation
+Future<void> _saveProduct() async {
+  if (!_formKey.currentState!.validate()) return;
+  
+  final productData = {
+    'name': _nameController.text.trim(),
+    'description': _descriptionController.text.trim(),
+    'price': double.parse(_priceController.text.trim()),
+    'unit': _unitController.text.trim(),
+    'category': _selectedCategory,
+    'imageIcon': _imageIconController.text.trim(),
+    'isAvailable': _isAvailable,
+    'stock': int.parse(_stockController.text.trim()),
+    'farmerId': user.uid,
+  };
+  
+  if (widget.productToEdit != null) {
+    // Update existing product
+    await _firestoreService.updateProduct(
+      widget.productToEdit!.id, 
+      productData
+    );
+  } else {
+    // Add new product
+    final productId = await _firestoreService.addProduct(productData);
+  }
+}
+```
+
+#### 3. **Farmer Dashboard** (`lib/screens/farmer_dashboard_screen.dart`)
+
+Displays farmer's products with edit/delete capabilities:
+
+```dart
+StreamBuilder<QuerySnapshot>(
+  stream: FirebaseFirestore.instance
+      .collection('products')
+      .where('farmerId', isEqualTo: user.uid)
+      .snapshots(),
+  builder: (context, snapshot) {
+    final products = snapshot.data!.docs
+        .map((doc) => Product.fromFirestore(doc.data()))
+        .toList();
+    
+    return ListView.builder(
+      itemCount: products.length,
+      itemBuilder: (context, index) {
+        final product = products[index];
+        return Card(
+          child: Row(
+            children: [
+              // Product info
+              Text(product.name),
+              Text('\$${product.price}'),
+              
+              // Action buttons
+              TextButton.icon(
+                onPressed: () => _navigateToEditProduct(product),
+                icon: Icon(Icons.edit),
+                label: Text('Edit'),
+              ),
+              TextButton.icon(
+                onPressed: () => _toggleAvailability(product.id, product.isAvailable),
+                icon: Icon(Icons.visibility),
+                label: Text('Hide/Show'),
+              ),
+              TextButton.icon(
+                onPressed: () => _deleteProduct(product.id),
+                icon: Icon(Icons.delete),
+                label: Text('Delete'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  },
+)
+```
+
+---
+
+### Data Validation
+
+All write operations include validation to prevent data corruption:
+
+#### 1. **Client-Side Validation** (Flutter Form)
+
+```dart
+// Name validation
+validator: (value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Product name is required';
+  }
+  if (value.trim().length < 3) {
+    return 'Name must be at least 3 characters';
+  }
+  return null;
+}
+
+// Price validation
+validator: (value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Price is required';
+  }
+  final price = double.tryParse(value.trim());
+  if (price == null || price <= 0) {
+    return 'Invalid price';
+  }
+  return null;
+}
+
+// Stock validation
+validator: (value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Stock is required';
+  }
+  final stock = int.tryParse(value.trim());
+  if (stock == null || stock < 0) {
+    return 'Invalid stock quantity';
+  }
+  return null;
+}
+```
+
+#### 2. **Server-Side Validation** (FirestoreService)
+
+```dart
+Future<String> addProduct(Map<String, dynamic> productData) async {
+  // Validate required fields
+  if (productData['name'] == null || productData['name'].toString().trim().isEmpty) {
+    throw 'Product name is required';
+  }
+  if (productData['price'] == null || productData['price'] <= 0) {
+    throw 'Valid product price is required';
+  }
+  if (productData['category'] == null || productData['category'].toString().trim().isEmpty) {
+    throw 'Product category is required';
+  }
+  
+  // Proceed with write operation
+  final docRef = await _firestore.collection('products').add(productData);
+  return docRef.id;
+}
+```
+
+#### 3. **Firestore Security Rules** (Backend)
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /products/{productId} {
+      // Anyone can read products
+      allow read: if true;
+      
+      // Only authenticated farmers can create
+      allow create: if request.auth != null
+        && request.resource.data.name is string
+        && request.resource.data.price is number
+        && request.resource.data.price > 0
+        && request.resource.data.category is string;
+      
+      // Only product owner can update/delete
+      allow update, delete: if request.auth != null
+        && resource.data.farmerId == request.auth.uid;
+    }
+  }
+}
+```
+
+---
+
+### Error Handling
+
+All operations include try-catch blocks with user-friendly messages:
+
+```dart
+Future<void> _saveProduct() async {
+  try {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    await _firestoreService.addProduct(productData);
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ Product added successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context, true);
+    }
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Error: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+}
+```
+
+---
+
+### Timestamps for Tracking
+
+All write operations automatically add timestamps:
+
+```dart
+await _firestore.collection('products').add({
+  ...productData,
+  'createdAt': FieldValue.serverTimestamp(), // Set once on creation
+  'updatedAt': FieldValue.serverTimestamp(), // Updated on every change
+});
+
+// On updates:
+await _firestore.collection('products').doc(productId).update({
+  ...updates,
+  'updatedAt': FieldValue.serverTimestamp(), // New timestamp on each edit
+});
+```
+
+**Benefits:**
+- Track when products are created
+- See last modification time
+- Sort by newest/oldest
+- Audit trail for changes
+
+---
+
+### Complete Write Operations Available
+
+#### Products (10 operations)
+```dart
+addProduct(productData)              // Create with auto ID
+setProduct(id, productData)          // Write with specific ID
+setProductMerge(id, updates)         // Partial update without overwriting
+updateProduct(id, updates)           // Update specific fields
+updateProductStock(id, stock)        // Update stock only
+updateProductPrice(id, price)        // Update price only
+updateProductAvailability(id, bool)  // Toggle availability
+deleteProduct(id)                    // Remove product
+batchUpdateProducts(updates)         // Update multiple products at once
+seedProducts(products)               // Batch insert for seeding
+```
+
+#### Categories (3 operations)
+```dart
+addCategory(categoryData)            // Create new category
+updateCategory(id, updates)          // Modify category
+deleteCategory(id)                   // Remove category
+```
+
+#### Reviews (3 operations)
+```dart
+addProductReview(productId, reviewData)       // Create review
+updateProductReview(productId, reviewId, updates)  // Modify review
+deleteProductReview(productId, reviewId)      // Remove review
+```
+
+#### Orders (1 operation)
+```dart
+updateOrderStatus(orderId, newStatus)  // Change order status + history
+```
+
+---
+
+### Usage Workflow
+
+#### For Farmers (Add Product)
+
+1. **Navigate to Dashboard** → Click "Add Product" button
+2. **Fill Form**:
+   - Product Name: "Fresh Organic Tomatoes" ✅
+   - Description: "Vine-ripened tomatoes from our farm" ✅
+   - Price: 3.99 ✅
+   - Unit: "per lb" ✅
+   - Category: "Vegetables" ✅
+   - Stock: 50 ✅
+   - Icon: 🍅 ✅
+   - Available: ON ✅
+3. **Click "Add Product"** → Validation runs
+4. **Success** → Product appears in dashboard immediately
+5. **Firestore Console** → Verify document created with timestamps
+
+#### For Farmers (Edit Product)
+
+1. **Dashboard** → Find product → Click "Edit"
+2. **Modify Fields** → Change price from $3.99 to $4.49
+3. **Click "Update Product"** → `updateProduct()` called
+4. **Success** → Changes appear across all devices instantly
+5. **Check `updatedAt`** → Timestamp updated
+
+#### For Farmers (Delete Product)
+
+1. **Dashboard** → Find product → Click "Delete"
+2. **Confirmation Dialog** → "Are you sure?"
+3. **Confirm** → `deleteProduct()` called
+4. **Success** → Product removed from all screens
+5. **Firestore** → Document deleted
+
+---
+
+### Testing Checklist
+
+Verify these scenarios:
+
+**Add Operations:**
+- [ ] Adding valid product succeeds
+- [ ] Empty name shows validation error
+- [ ] Invalid price (0 or negative) shows error
+- [ ] Empty description shows error
+- [ ] Product appears in Firestore console
+- [ ] `createdAt` and `updatedAt` timestamps present
+- [ ] Success message displays
+
+**Update Operations:**
+- [ ] Editing product updates fields correctly
+- [ ] Updating price changes value in real-time
+- [ ] Toggling availability hides/shows product
+- [ ] `updatedAt` timestamp changes
+- [ ] Changes appear in Firestore console
+- [ ] Success message displays
+
+**Delete Operations:**
+- [ ] Delete confirmation dialog appears
+- [ ] Confirming deletes product
+- [ ] Canceling keeps product
+- [ ] Product removed from Firestore
+- [ ] Success message displays
+
+**Error Handling:**
+- [ ] Network error shows error message
+- [ ] Invalid data blocked by validation
+- [ ] Loading indicator appears during operations
+- [ ] Error messages are user-friendly
+
+---
+
+### Screenshots & Verification
+
+#### 1. Add Product Form
+![Add Product Screen](screenshots/add-product-form.png)
+- All input fields with validation
+- Category dropdown
+- Availability toggle
+- Submit button with loading state
+
+#### 2. Firestore Console - Before Add
+![Firestore Before](screenshots/firestore-before-add.png)
+- Empty or existing products collection
+
+#### 3. Firestore Console - After Add
+![Firestore After Add](screenshots/firestore-after-add.png)
+- New document with auto-generated ID
+- All fields populated
+- `createdAt` and `updatedAt` timestamps
+
+#### 4. Farmer Dashboard
+![Farmer Dashboard](screenshots/farmer-dashboard.png)
+- List of farmer's products
+- Edit, Hide/Show, Delete buttons
+- Real-time updates from Firestore
+
+#### 5. Edit Product
+![Edit Product](screenshots/edit-product.png)
+- Pre-filled form with existing data
+- Update button instead of Add
+
+#### 6. Firestore Console - After Update
+![Firestore After Update](screenshots/firestore-after-update.png)
+- Updated fields visible
+- `updatedAt` timestamp changed
+
+---
+
+### Reflection: Why Secure Writes Matter
+
+#### 1. **Data Integrity**
+Without validation, users could submit:
+- Products with no name ❌
+- Negative prices ❌
+- Empty descriptions ❌
+
+**Solution:** Client + server validation ensures only valid data enters the database.
+
+#### 2. **Security Concerns**
+Without authentication checks:
+- Anyone could delete any product ❌
+- Users could modify others' listings ❌
+- Malicious data could be inserted ❌
+
+**Solution:** Firestore Security Rules restrict write access to authenticated users and product owners only.
+
+#### 3. **User Experience**
+Without proper error handling:
+- Silent failures confuse users ❌
+- No feedback on success/failure ❌
+- Loading states missing ❌
+
+**Solution:** Try-catch blocks with SnackBar messages provide clear feedback and loading indicators.
+
+#### 4. **Data Consistency**
+Without timestamps:
+- No audit trail ❌
+- Can't sort by newest ❌
+- No modification history ❌
+
+**Solution:** `FieldValue.serverTimestamp()` automatically tracks when documents are created and updated.
+
+#### 5. **Difference: Add vs Set vs Update**
+
+**add()**: Best for user-generated content
+- Auto-generates unique ID
+- Never overwrites existing data
+- Used: products, orders, reviews
+
+**set()**: Best for known documents
+- Requires explicit ID
+- Overwrites ALL fields (dangerous!)
+- Used: user profiles with UID
+
+**set(merge: true)**: Safest option
+- Updates only specified fields
+- Creates if missing
+- Used: partial updates, preferences
+
+**update()**: Best for modifications
+- Only changes specified fields
+- Fails if document missing (safe)
+- Used: edit operations, status changes
+
+---
+
+### Best Practices Implemented
+
+✅ **Validate Before Writing** - All inputs validated client + server  
+✅ **Use Correct Data Types** - Numbers as numbers, not strings  
+✅ **Add Timestamps** - `createdAt` and `updatedAt` on all documents  
+✅ **Never Overwrite Accidentally** - Use `update()` instead of `set()`  
+✅ **Authenticate Users** - Check `user != null` before writes  
+✅ **Handle Errors Gracefully** - Try-catch with user feedback  
+✅ **Use Loading States** - Show spinner during operations  
+✅ **Confirm Destructive Actions** - Dialog before delete  
+✅ **Provide Feedback** - Success/error messages via SnackBar  
+✅ **Structure Data Consistently** - Follow schema design
+
+---
+
+### Next Steps
+
+- **Image Upload**: Add Firebase Storage for product photos
+- **Batch Operations**: Update multiple products at once
+- **Versioning**: Track product history with subcollections
+- **Offline Support**: Queue writes when offline
+- **Analytics**: Track which products are edited most
+- **Duplicate Detection**: Prevent adding identical products
+
+---
+
 ## 🛠️ Technologies Used
 
 - **Flutter**: UI framework
