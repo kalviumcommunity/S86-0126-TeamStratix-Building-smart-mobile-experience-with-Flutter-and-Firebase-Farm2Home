@@ -41,13 +41,15 @@ class _AnimatedButtonState extends State<AnimatedButton>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
-    _rotationAnimation = Tween<double>(begin: 0.0, end: 360.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _rotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 360.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -77,7 +79,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: widget.backgroundColor.withOpacity(0.3),
+              color: widget.backgroundColor.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -179,9 +181,10 @@ class _AnimatedFloatingActionButtonState
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.9).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.9,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override

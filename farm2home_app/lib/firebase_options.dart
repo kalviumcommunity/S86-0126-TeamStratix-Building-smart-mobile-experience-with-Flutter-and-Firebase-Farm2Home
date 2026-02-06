@@ -51,37 +51,39 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_ANDROID_API_KEY',
-    appId: 'YOUR_ANDROID_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyBjzlDaxpZ2vis22KZZlntcyPcTt-HBU98',
+    appId: '1:795536206416:android:f72507ab60f756131eff55',
+    messagingSenderId: '795536206416',
+    projectId: 'farm2home-59d16',
+    storageBucket: 'farm2home-59d16.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'YOUR_IOS_API_KEY',
-    appId: 'YOUR_IOS_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyAPip-TiH6S_Ex5ewYcdLDv0az6BnygW0s',
+    appId: '1:795536206416:ios:37a1e68289a7ebf71eff55',
+    messagingSenderId: '795536206416',
+    projectId: 'farm2home-59d16',
+    storageBucket: 'farm2home-59d16.firebasestorage.app',
     iosBundleId: 'com.example.farm2homeApp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'YOUR_MACOS_API_KEY',
-    appId: 'YOUR_MACOS_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyAPip-TiH6S_Ex5ewYcdLDv0az6BnygW0s',
+    appId: '1:795536206416:ios:37a1e68289a7ebf71eff55',
+    messagingSenderId: '795536206416',
+    projectId: 'farm2home-59d16',
+    storageBucket: 'farm2home-59d16.firebasestorage.app',
     iosBundleId: 'com.example.farm2homeApp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'YOUR_WINDOWS_API_KEY',
-    appId: 'YOUR_WINDOWS_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    authDomain: 'YOUR_AUTH_DOMAIN',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyBcblyTc4HXQv7KXRYLK3fHbHPc9sNU3Vg',
+    appId: '1:795536206416:web:d24a0022058ceaaf1eff55',
+    messagingSenderId: '795536206416',
+    projectId: 'farm2home-59d16',
+    authDomain: 'farm2home-59d16.firebaseapp.com',
+    storageBucket: 'farm2home-59d16.firebasestorage.app',
+    measurementId: 'G-0JVWSM6NR6',
   );
+
 }
