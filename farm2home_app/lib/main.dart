@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart'; // SignUpScreen class
@@ -16,16 +17,14 @@ import 'screens/responsive_product_grid.dart';
 import 'screens/responsive_form_layout.dart';
 import 'screens/assets_management_demo.dart';
 import 'screens/animations_demo_screen.dart';
-import 'services/auth_service.dart';
+import 'screens/splash_screen.dart';
 import 'services/cart_service.dart';
 import 'screens/home_screen.dart';
 
 /// Entry point of the Farm2Home application
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const Farm2HomeApp());
 }
 
@@ -86,9 +85,7 @@ Route<dynamic> _createPageTransition(RouteSettings settings) {
         position: Tween<Offset>(
           begin: const Offset(1.0, 0.0),
           end: Offset.zero,
-        ).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeInOut),
-        ),
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
         child: child,
       );
     },
@@ -96,33 +93,57 @@ Route<dynamic> _createPageTransition(RouteSettings settings) {
 }
 
 /// Auth wrapper to check if user is logged in
+/// Uses Firebase authStateChanges() stream to automatically handle session persistence
+/// This ensures users stay logged in across app restarts without manual intervention
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final authService = AuthService();
-    
-    return StreamBuilder(
-      stream: authService.authStateChanges,
+    // Listen to Firebase Auth state changes
+    // This stream automatically handles:
+    // - User login
+    // - User logout
+    // - Session restoration on app restart
+    // - Token refresh
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
+        // Show splash screen while checking authentication state
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            backgroundColor: Color(0xFFD4EDD4),
+          return const SplashScreen();
+        }
+
+        // Check for errors
+        if (snapshot.hasError) {
+          return Scaffold(
             body: Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFF4A7C4A),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text('Authentication Error: ${snapshot.error}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () async {
+                      // Sign out and retry
+                      await FirebaseAuth.instance.signOut();
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
               ),
             ),
           );
         }
-        
-        if (snapshot.hasData) {
-          // User is logged in
+
+        // User is authenticated - redirect to HomeScreen
+        if (snapshot.hasData && snapshot.data != null) {
           return HomeScreen(cartService: CartService());
         }
-        
-        // User is not logged in
+
+        // No authenticated user - show LoginScreen
         return const LoginScreen();
       },
     );

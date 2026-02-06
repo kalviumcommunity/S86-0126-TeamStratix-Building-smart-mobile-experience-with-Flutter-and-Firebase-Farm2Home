@@ -92,9 +92,7 @@ class _AnimatedProductCardState extends State<AnimatedProductCard>
                         ),
                         // Overlay on hover
                         if (_isHovered)
-                          Container(
-                            color: Colors.black.withOpacity(0.2),
-                          ),
+                          Container(color: Colors.black.withValues(alpha: 0.2)),
                       ],
                     ),
                   ),
@@ -107,9 +105,8 @@ class _AnimatedProductCardState extends State<AnimatedProductCard>
                     children: [
                       Text(
                         widget.title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -120,8 +117,9 @@ class _AnimatedProductCardState extends State<AnimatedProductCard>
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color:
-                              _isHovered ? Colors.green[600] : Colors.green[400],
+                          color: _isHovered
+                              ? Colors.green[600]
+                              : Colors.green[400],
                         ),
                         child: Text('₹${widget.price.toStringAsFixed(2)}'),
                       ),

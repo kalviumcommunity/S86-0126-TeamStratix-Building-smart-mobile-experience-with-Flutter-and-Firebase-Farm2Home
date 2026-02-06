@@ -4,7 +4,385 @@
 
 ---
 
-## � Local UI State Management with setState() (Sprint 2)
+## 🔐 Persistent User Sessions with Firebase Auth (Sprint 2)
+
+### Overview
+Modern mobile apps keep users logged in even after closing the app or restarting their device. Firebase Authentication automatically manages session persistence using secure tokens stored on the device. This implementation demonstrates how to build a seamless auto-login flow that detects, stores, and restores user login states across app restarts.
+
+### Why Persistent Login is Essential
+- **Better User Experience**: Users don't have to log in every time they open the app
+- **Session Continuity**: Firebase securely stores authentication tokens on the device
+- **Automatic Token Refresh**: Firebase handles token expiration and refresh automatically
+- **Industry Standard**: Expected behavior in all modern mobile applications
+- **Secure by Default**: Firebase encryption ensures token security
+
+### Features
+- ✅ **Auto-Login Detection** - Automatically detects if user is already logged in
+- ✅ **Session Persistence** - Login state maintained across app restarts
+- ✅ **Smart Routing** - Redirects to appropriate screen based on auth state
+- ✅ **Splash Screen** - Professional loading experience during auth check
+- ✅ **Automatic Logout Handling** - Clean session termination and redirect
+- ✅ **Token Management** - Firebase auto-refreshes authentication tokens
+
+---
+
+### How Firebase Session Persistence Works
+
+Firebase Auth automatically persists user sessions using **secure tokens** stored on the device:
+
+1. **User logs in** → Firebase creates authentication token
+2. **Token stored securely** → Encrypted storage on device
+3. **App closes** → Token remains in secure storage
+4. **App reopens** → Firebase validates token automatically
+5. **Token valid** → User stays logged in
+6. **Token expired/invalid** → User redirected to login
+
+**Key Benefits:**
+- No manual storage (SharedPreferences, SQLite, etc.) required
+- Tokens auto-refresh in the background
+- Developers only handle screen routing based on auth state
+- Firebase manages security and encryption
+
+---
+
+### Implementation: authStateChanges() Stream
+
+The foundation of persistent sessions is Firebase's `authStateChanges()` stream, which notifies your app whenever:
+- User logs in
+- User logs out
+- Session becomes invalid
+- User reopens the app
+
+#### Core Implementation in main.dart
+
+```dart
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Listen to Firebase Auth state changes
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        // Show splash screen while checking auth state
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SplashScreen();
+        }
+        
+        // User is authenticated → Navigate to HomeScreen
+        if (snapshot.hasData && snapshot.data != null) {
+          return HomeScreen(cartService: CartService());
+        }
+        
+        // No authenticated user → Show LoginScreen
+        return const LoginScreen();
+      },
+    );
+  }
+}
+```
+
+**How it Works:**
+1. `authStateChanges()` creates a continuous stream
+2. `StreamBuilder` listens to this stream
+3. When auth state changes, `StreamBuilder` rebuilds automatically
+4. App redirects to appropriate screen based on user state
+
+---
+
+### Auto-Login Flow Diagram
+
+```
+App Starts
+    ↓
+AuthWrapper checks authStateChanges()
+    ↓
+ConnectionState.waiting? → Show SplashScreen
+    ↓
+snapshot.hasData?
+    ↓
+  YES → User is logged in → Navigate to HomeScreen
+    ↓
+   NO → No active session → Navigate to LoginScreen
+```
+
+---
+
+### Splash Screen Implementation
+
+A professional loading experience while Firebase checks session state:
+
+```dart
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFD4EDD4),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.agriculture, size: 100, color: Colors.green.shade700),
+            const SizedBox(height: 24),
+            Text('Farm2Home', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 48),
+            CircularProgressIndicator(color: Colors.green.shade700),
+            const SizedBox(height: 16),
+            Text('Loading...', style: TextStyle(fontSize: 14)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+---
+
+### Login & Sign Up Flow (No Manual Navigation Required)
+
+**Before (Manual Navigation):**
+```dart
+// ❌ Old approach - manual navigation causes issues
+final user = await _authService.login(email, password);
+if (user != null) {
+  Navigator.pushReplacement(context, HomeScreen());  // Unnecessary
+}
+```
+
+**After (Automatic Navigation via AuthWrapper):**
+```dart
+// ✅ New approach - AuthWrapper handles navigation automatically
+final user = await _authService.login(email, password);
+if (user != null && mounted) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Login successful!')),
+  );
+  // AuthWrapper's StreamBuilder detects auth change and navigates automatically
+}
+```
+
+**Why This is Better:**
+- Eliminates duplicate navigation logic
+- AuthWrapper centrally manages all auth-based routing
+- Prevents navigation conflicts
+- Works seamlessly with auto-login on app restart
+
+---
+
+### Logout Implementation
+
+Clean session termination from HomeScreen:
+
+```dart
+IconButton(
+  icon: const Icon(Icons.logout),
+  onPressed: () async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      // AuthWrapper automatically redirects to LoginScreen
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Logged out successfully')),
+        );
+      }
+    } catch (e) {
+      // Handle error
+    }
+  },
+)
+```
+
+**What Happens:**
+1. `signOut()` clears authentication token
+2. `authStateChanges()` stream emits `null`
+3. AuthWrapper's StreamBuilder rebuilds
+4. User automatically redirected to LoginScreen
+
+---
+
+### Testing Persistent Login
+
+#### Test Scenario 1: Auto-Login After App Restart
+1. **Login** → Enter credentials → Submit
+2. **Verify** → HomeScreen appears with user email
+3. **Close App** → Fully close the app (swipe away from recent apps)
+4. **Reopen App** → Launch app again
+5. **Expected Result** → App shows SplashScreen briefly, then automatically navigates to HomeScreen
+6. **Success** ✅ User remained logged in without re-entering credentials
+
+#### Test Scenario 2: Logout and Session Termination
+1. **Navigate** → Open HomeScreen
+2. **Logout** → Tap logout icon in AppBar
+3. **Verify** → Redirected to LoginScreen
+4. **Close App** → Fully close the app
+5. **Reopen App** → Launch app again
+6. **Expected Result** → App shows LoginScreen (session terminated)
+7. **Success** ✅ Logout properly cleared session
+
+#### Test Scenario 3: Multiple Restarts
+1. **Login** → Authenticate user
+2. **Restart 1** → Close and reopen → Should show HomeScreen
+3. **Restart 2** → Close and reopen again → Should still show HomeScreen
+4. **Restart 3** → Close and reopen once more → Should still show HomeScreen
+5. **Success** ✅ Session persists indefinitely until logout
+
+---
+
+### Handling Token Expiry and Errors
+
+Firebase handles token management automatically:
+
+**Token Refresh:**
+- Tokens auto-refresh in the background
+- No developer intervention required
+- Happens seamlessly without user awareness
+
+**Token Invalidation (Automatic Logout):**
+Tokens become invalid when:
+- User changes password
+- User account is deleted
+- User clears app data
+- Admin disables user account in Firebase Console
+
+**Error Handling in AuthWrapper:**
+```dart
+if (snapshot.hasError) {
+  return Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 48, color: Colors.red),
+          const SizedBox(height: 16),
+          Text('Error: ${snapshot.error}'),
+          ElevatedButton(
+            onPressed: () => (context as Element).reassemble(),
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+```
+
+---
+
+### Verifying Session in Firebase Console
+
+**Optional Step** - Confirm session is managed by Firebase:
+
+1. Open [Firebase Console](https://console.firebase.google.com/)
+2. Navigate to **Authentication** → **Users**
+3. Observe:
+   - User account exists
+   - **Last sign-in** timestamp updates when you login
+   - **Created** timestamp shows account creation date
+
+**Key Insight:**
+- Session is tied to Firebase backend, not just local device storage
+- Firebase manages token validation centrally
+- User state syncs across all devices if logged in on multiple devices
+
+---
+
+### Code Architecture
+
+```
+main.dart
+  └── AuthWrapper (Root Widget)
+       └── StreamBuilder<User?>
+            ├── stream: FirebaseAuth.instance.authStateChanges()
+            ├── ConnectionState.waiting → SplashScreen
+            ├── snapshot.hasData → HomeScreen
+            └── No data → LoginScreen
+
+LoginScreen / SignUpScreen
+  ├── User enters credentials
+  ├── AuthService.login() / AuthService.signUp()
+  └── AuthWrapper automatically detects auth state change
+       └── Navigates to HomeScreen
+
+HomeScreen
+  ├── Logout button → FirebaseAuth.instance.signOut()
+  └── AuthWrapper detects auth state change
+       └── Navigates to LoginScreen
+```
+
+---
+
+### Screenshots
+
+#### 1. Splash Screen (App Loading)
+*Shows while Firebase checks authentication state*
+
+#### 2. Login Screen (No Active Session)
+*Displayed when user is not logged in*
+
+#### 3. Home Screen (User Authenticated)
+*Displays user email and logout button*
+
+#### 4. Auto-Login After Restart
+*User remains logged in after closing and reopening app*
+
+#### 5. Logout Flow
+*User clicks logout → Redirected to LoginScreen → Session cleared*
+
+---
+
+### Reflection: Why Firebase Makes Session Handling Easier
+
+**Traditional Session Management (Without Firebase):**
+- Manually store tokens in SharedPreferences/Keychain
+- Implement token refresh logic
+- Handle token expiration manually
+- Write encryption for secure storage
+- Manage session synchronization across app restarts
+- Build complex state management for auth flow
+
+**With Firebase Authentication:**
+- ✅ Automatic token storage and encryption
+- ✅ Built-in token refresh mechanism
+- ✅ Cross-platform session persistence (iOS, Android, Web)
+- ✅ Simple `authStateChanges()` stream for state detection
+- ✅ No manual storage or encryption needed
+- ✅ Enterprise-grade security out of the box
+
+**Personal Insights:**
+1. **Simplicity**: Firebase reduces hundreds of lines of boilerplate code to a single `StreamBuilder`
+2. **Reliability**: Eliminates common bugs related to token expiration and storage
+3. **Security**: Firebase handles encryption and secure storage automatically
+4. **Scalability**: Works seamlessly as user base grows without performance concerns
+
+**Challenges Faced:**
+- Initially implemented manual navigation in LoginScreen, which conflicted with AuthWrapper's automatic navigation
+- **Solution**: Removed all manual navigation logic from auth screens and let AuthWrapper handle routing centrally
+- **Learning**: Centralizing navigation based on auth state creates cleaner, more maintainable code
+
+**Best Practices Learned:**
+1. Always use `authStateChanges()` as the single source of truth for auth state
+2. Avoid manual navigation after login/logout - let StreamBuilder handle it
+3. Show loading states (SplashScreen) for better UX during auth checks
+4. Test auto-login thoroughly by fully closing and reopening the app
+
+---
+
+### Key Takeaways
+
+1. **Firebase Automates Session Persistence** - No manual token storage required
+2. **authStateChanges() is Essential** - Single stream for all auth state management
+3. **StreamBuilder Drives Navigation** - Automatically redirects based on auth state
+4. **SplashScreen Enhances UX** - Professional loading experience during auth check
+5. **Centralized Auth Logic** - AuthWrapper manages all authentication-based routing
+6. **Testing is Critical** - Always verify auto-login by fully closing and reopening app
+
+---
+
+## 📊 Local UI State Management with setState() (Sprint 2)
 
 ### Overview
 This section demonstrates how Flutter manages local UI state using the `setState()` method within Stateful widgets. State management is fundamental to creating interactive applications that respond dynamically to user input.
