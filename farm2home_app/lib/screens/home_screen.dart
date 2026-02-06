@@ -164,6 +164,24 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/assets-management');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.animation, color: Colors.red),
+              title: const Text('Animations Demo'),
+              subtitle: const Text('Various animation patterns'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/animations');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.storage, color: Colors.deepOrange),
+              title: const Text('Firestore Queries'),
+              subtitle: const Text('where(), orderBy(), limit() patterns'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/firestore-queries');
+              },
+            ),
           ],
         ),
       ),
