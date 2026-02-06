@@ -25,6 +25,7 @@ import 'screens/fcm_demo_screen.dart';
 import 'screens/secure_profile_screen.dart';
 import 'screens/location_preview_screen.dart';
 import 'screens/splash_screen.dart';
+import 'screens/my_notes_screen.dart';
 
 import 'services/cart_service.dart';
 
@@ -96,6 +97,8 @@ class Farm2HomeApp extends StatelessWidget {
             const SecureProfileScreen(),
         '/location-preview': (context) =>
             const LocationPreviewScreen(),
+        '/my-notes': (context) =>
+            const MyNotesScreen(),
       },
       onGenerateRoute: (settings) =>
           _createPageTransition(settings),
