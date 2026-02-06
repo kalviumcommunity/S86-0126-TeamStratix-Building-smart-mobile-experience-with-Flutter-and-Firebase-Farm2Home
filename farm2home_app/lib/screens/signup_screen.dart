@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
-import '../services/cart_service.dart';
 import 'login_screen.dart';
-import 'home_screen.dart';
 
-/// Sign Up Screen
+/// Sign Up Screen with Firebase Authentication
+/// Note: Navigation to HomeScreen is handled automatically by AuthWrapper
+/// in main.dart using authStateChanges() stream
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -54,11 +54,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
           'favorites': [],
         });
 
+        // No need to manually navigate - AuthWrapper's StreamBuilder
+        // will automatically detect the auth state change and navigate to HomeScreen
         if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomeScreen(cartService: CartService()),
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Account created successfully!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 1),
             ),
           );
         }
@@ -66,10 +69,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -110,10 +110,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   const SizedBox(height: 10),
                   const Text(
                     'Sign up to get started!',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF5A7A5A),
-                    ),
+                    style: TextStyle(fontSize: 16, color: Color(0xFF5A7A5A)),
                   ),
                   const SizedBox(height: 30),
                   // Name field
@@ -208,8 +205,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               : Icons.visibility,
                         ),
                         onPressed: () {
-                          setState(() =>
-                              _obscureConfirmPassword = !_obscureConfirmPassword);
+                          setState(
+                            () => _obscureConfirmPassword =
+                                !_obscureConfirmPassword,
+                          );
                         },
                       ),
                       border: OutlineInputBorder(
