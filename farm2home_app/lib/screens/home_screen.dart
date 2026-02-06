@@ -191,6 +191,15 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/media-upload');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.cloud_done, color: Colors.purple),
+              title: const Text('Cloud Functions'),
+              subtitle: const Text('Call serverless functions'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/cloud-functions');
+              },
+            ),
           ],
         ),
       ),
