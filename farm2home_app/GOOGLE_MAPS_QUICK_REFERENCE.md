@@ -1,6 +1,49 @@
-# Google Maps Quick Reference
+# Google Maps Integration - Quick Reference
 
-## Essential Commands
+## 🚀 Quick Start (10 minutes)
+
+### 1️⃣ Get API Key (5 minutes)
+```
+1. Go to console.cloud.google.com
+2. Create project "Farm2Home Maps"
+3. Enable "Maps SDK for Android"
+4. Enable "Maps SDK for iOS"
+5. Create API Key (Credentials → Create Credentials)
+6. Copy the key
+```
+
+### 2️⃣ Configure Platforms
+
+#### Android (2 minutes)
+**File**: `android/app/src/main/AndroidManifest.xml`
+```xml
+<meta-data
+    android:name="com.google.android.geo.API_KEY"
+    android:value="YOUR_KEY_HERE" />
+```
+
+#### iOS (2 minutes)
+**File**: `ios/Runner/AppDelegate.swift`
+```swift
+GMSServices.provideAPIKey("YOUR_KEY_HERE")
+```
+
+**File**: `ios/Runner/Info.plist`
+```xml
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>This app needs access to your location to show it on the map</string>
+```
+
+### 3️⃣ Install Dependencies (1 minute)
+```bash
+flutter clean
+flutter pub get
+flutter run
+```
+
+---
+
+## 📋 Essential Commands
 
 ```bash
 # Install dependencies
@@ -10,26 +53,15 @@ flutter pub get
 flutter run
 
 # Navigate to map screen
-Navigator.push(context, MaterialPageRoute(builder: (context) => const MapScreen()));
+Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => const MapScreen()),
+);
 ```
 
-## API Key Configuration
+---
 
-### Android
-📁 `android/app/src/main/AndroidManifest.xml`
-```xml
-<meta-data
-    android:name="com.google.android.geo.API_KEY"
-    android:value="YOUR_API_KEY"/>
-```
-
-### iOS
-📁 `ios/Runner/AppDelegate.swift`
-```swift
-GMSServices.provideAPIKey("YOUR_API_KEY")
-```
-
-## Basic Usage
+## 💡 Basic Usage
 
 ### Import
 ```dart
