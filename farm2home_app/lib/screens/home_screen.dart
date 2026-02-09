@@ -164,6 +164,69 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/assets-management');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.animation, color: Colors.red),
+              title: const Text('Animations Demo'),
+              subtitle: const Text('Various animation patterns'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/animations');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.storage, color: Colors.deepOrange),
+              title: const Text('Firestore Queries'),
+              subtitle: const Text('where(), orderBy(), limit() patterns'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/firestore-queries');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.cloud_upload, color: Colors.cyan),
+              title: const Text('Media Upload'),
+              subtitle: const Text('Upload images to Firebase Storage'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/media-upload');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.cloud_done, color: Colors.purple),
+              title: const Text('Cloud Functions'),
+              subtitle: const Text('Call serverless functions'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/cloud-functions');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications_active, color: Colors.blue),
+              title: const Text('Push Notifications'),
+              subtitle: const Text('Firebase Cloud Messaging (FCM)'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/fcm');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.security, color: Colors.green),
+              title: const Text('Secure Profile'),
+              subtitle: const Text('Auth + Firestore Security Rules'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/secure-profile');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.map, color: Colors.blue),
+              title: const Text('Location Preview'),
+              subtitle: const Text('Google Maps Integration'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/location-preview');
+              },
+            ),
           ],
         ),
       ),
