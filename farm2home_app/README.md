@@ -1732,6 +1732,9 @@ flutter run
 - **Shopping Cart**: Add items, manage quantities, and checkout
 - **Real-time Database**: Firestore integration for user data and orders
 - **User Profile**: View account details and logout
+- **Google Maps Integration**: Interactive maps with farm locations
+- **Location Tracking**: Real-time GPS tracking and user location services
+- **CRUD Operations**: Complete Create, Read, Update, Delete functionality for user data
 
 ### Firebase Integration
 - ✅ Email/Password Authentication
@@ -1739,6 +1742,14 @@ flutter run
 - ✅ Real-time order management
 - ✅ User favorites tracking
 - ✅ Automatic data persistence
+- ✅ User-specific CRUD operations with security rules
+
+### Location Services
+- ✅ Interactive Google Maps display
+- ✅ Custom map markers for farms
+- ✅ Real-time GPS location tracking
+- ✅ User location permissions handling
+- ✅ Map type controls (normal, satellite, terrain)
 
 ## 🔥 Firebase Setup
 
@@ -3187,13 +3198,438 @@ Without timestamps:
 
 ---
 
-## 🛠️ Technologies Used
+## �️ Google Maps Integration
 
-- **Flutter**: UI framework
-- **Firebase Authentication**: User management
-- **Cloud Firestore**: NoSQL database
-- **Material Design 3**: UI components
+### Overview
+Farm2Home includes interactive maps for finding local farms, viewing farm locations, and tracking deliveries. The integration uses Google Maps SDK for Flutter with custom markers and user location tracking.
+
+### Features
+
+#### Basic Map Screen
+- **Interactive Map Display**: Pan, zoom, rotate gestures
+- **Custom Markers**: Display farm locations with custom icons
+- **Map Type Controls**: Switch between normal, satellite, terrain views
+- **User Location**: Show current device location on map
+- **Camera Controls**: Programmatically move and animate camera
+
+#### Location Tracking Screen
+- **Real-time GPS Tracking**: Live position updates as you move
+- **Path Visualization**: Draw line showing your movement trail
+- **Distance Calculations**: Track distance traveled
+- **Location Permissions**: Handle runtime permissions gracefully
+- **Custom Markers**: Different colors for start, current, and waypoints
+- **Stop/Start Tracking**: Control tracking with button
+
+### Setup
+
+#### 1. Dependencies
+```yaml
+dependencies:
+  google_maps_flutter: ^2.5.0
+  location: ^5.0.0
+  geolocator: ^10.1.0
+```
+
+#### 2. Android Configuration
+```xml
+<!-- android/app/src/main/AndroidManifest.xml -->
+<manifest>
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  
+  <application>
+    <meta-data
+      android:name="com.google.android.geo.API_KEY"
+      android:value="YOUR_API_KEY_HERE" />
+  </application>
+</manifest>
+```
+
+#### 3. iOS Configuration
+```xml
+<!-- ios/Runner/Info.plist -->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>This app needs access to your location to show nearby farms</string>
+<key>NSLocationAlwaysUsageDescription</key>
+<string>This app needs access to your location for delivery tracking</string>
+```
+
+### Code Examples
+
+#### Basic Map Implementation
+```dart
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+class MapScreen extends StatefulWidget {
+  @override
+  State<MapScreen> createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  GoogleMapController? _controller;
+  final LatLng _initialPosition = const LatLng(37.7749, -122.4194);
+  
+  @override
+  Widget build(BuildContext context) {
+    return GoogleMap(
+      initialCameraPosition: CameraPosition(
+        target: _initialPosition,
+        zoom: 12,
+      ),
+      onMapCreated: (controller) => _controller = controller,
+      myLocationEnabled: true,
+      myLocationButtonEnabled: true,
+    );
+  }
+}
+```
+
+#### Location Tracking
+```dart
+import 'package:geolocator/geolocator.dart';
+
+Future<void> _startLiveTracking() async {
+  // Check permissions
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+  }
+  
+  // Start tracking
+  Geolocator.getPositionStream(
+    locationSettings: const LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 10, // Update every 10 meters
+    ),
+  ).listen((Position position) {
+    // Update marker position
+    _updateMarker(LatLng(position.latitude, position.longitude));
+  });
+}
+```
+
+### File Locations
+- [lib/screens/map_screen.dart](lib/screens/map_screen.dart) - Basic map screen
+- [lib/screens/location_tracking_screen.dart](lib/screens/location_tracking_screen.dart) - Advanced tracking
+- [GOOGLE_MAPS_QUICK_REFERENCE.md](GOOGLE_MAPS_QUICK_REFERENCE.md) - Quick reference guide
+
+### API Key Setup
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Enable **Maps SDK for Android** and **Maps SDK for iOS**
+3. Create an API key for your project
+4. Add restrictions (Android package name, iOS bundle ID)
+5. Add keys to `AndroidManifest.xml` and `Info.plist`
+
+---
+
+## 🔄 CRUD Operations (Create, Read, Update, Delete)
+
+### Overview
+Farm2Home implements a complete CRUD system for managing user-specific data (notes, tasks, preferences). All operations are secured with Firebase Authentication and use Firestore's real-time capabilities for instant UI updates.
+
+### Features
+
+- ✅ **Create**: Add new items with validation
+- ✅ **Read**: Real-time list with StreamBuilder
+- ✅ **Update**: Edit existing items
+- ✅ **Delete**: Remove items with confirmation
+- ✅ **User-Specific Data**: Each user sees only their own items
+- ✅ **Firestore Security Rules**: Server-side access control
+- ✅ **Error Handling**: User-friendly error messages
+- ✅ **Loading States**: Visual feedback during operations
+- ✅ **Form Validation**: Prevent empty or invalid data
+
+### Architecture
+
+#### Data Model (`lib/models/note_item.dart`)
+```dart
+class NoteItem {
+  final String? id;
+  final String title;
+  final String description;
+  final String userId;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+
+  NoteItem({
+    this.id,
+    required this.title,
+    required this.description,
+    required this.userId,
+    required this.createdAt,
+    this.updatedAt,
+  });
+
+  factory NoteItem.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map<String, dynamic>;
+    return NoteItem(
+      id: doc.id,
+      title: data['title'] ?? '',
+      description: data['description'] ?? '',
+      userId: data['userId'] ?? '',
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      updatedAt: data['updatedAt'] != null 
+        ? (data['updatedAt'] as Timestamp).toDate() 
+        : null,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'description': description,
+      'userId': userId,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt) : null,
+    };
+  }
+}
+```
+
+#### CRUD Service (`lib/services/crud_service.dart`)
+```dart
+class CrudService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AuthService _authService = AuthService();
+
+  // CREATE
+  Future<String> createItem({
+    required String title,
+    required String description,
+  }) async {
+    final user = _authService.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    final item = NoteItem(
+      title: title,
+      description: description,
+      userId: user.uid,
+      createdAt: DateTime.now(),
+    );
+
+    final docRef = await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('items')
+        .add(item.toMap());
+
+    return docRef.id;
+  }
+
+  // READ (Real-time Stream)
+  Stream<List<NoteItem>> getUserItemsStream() {
+    final user = _authService.currentUser;
+    if (user == null) return Stream.value([]);
+
+    return _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('items')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => NoteItem.fromFirestore(doc))
+            .toList());
+  }
+
+  // UPDATE
+  Future<void> updateItem({
+    required String itemId,
+    required String title,
+    required String description,
+  }) async {
+    final user = _authService.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('items')
+        .doc(itemId)
+        .update({
+      'title': title,
+      'description': description,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  // DELETE
+  Future<void> deleteItem(String itemId) async {
+    final user = _authService.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('items')
+        .doc(itemId)
+        .delete();
+  }
+}
+```
+
+### UI Implementation (`lib/screens/crud_demo_screen.dart`)
+
+The CRUD demo screen provides a complete user interface with:
+
+1. **Real-time List**: StreamBuilder automatically updates when data changes
+2. **Create Dialog**: Form with validation for new items
+3. **Edit Dialog**: Pre-filled form for updating items
+4. **Delete Confirmation**: Prevents accidental deletions
+5. **Empty State**: User-friendly message when no items exist
+6. **Loading Indicators**: Visual feedback during operations
+7. **Error Messages**: SnackBar notifications for success/failure
+
+#### Key Features:
+```dart
+// Real-time List
+StreamBuilder<List<NoteItem>>(
+  stream: _crudService.getUserItemsStream(),
+  builder: (context, snapshot) {
+    if (snapshot.hasError) {
+      return Center(child: Text('Error: ${snapshot.error}'));
+    }
+    
+    if (!snapshot.hasData) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
+    final items = snapshot.data!;
+    
+    if (items.isEmpty) {
+      return Center(
+        child: Text('No items yet. Tap + to create one!'),
+      );
+    }
+    
+    return ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return ListTile(
+          title: Text(item.title),
+          subtitle: Text(item.description),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () => _showEditDialog(item),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => _showDeleteDialog(item),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  },
+)
+```
+
+### Firestore Security Rules
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // User-specific items collection
+    match /users/{userId}/items/{itemId} {
+      // Only authenticated users can access
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+### Data Structure
+
+```
+Firestore Database
+└── users/
+    └── {userId}/               # User's unique ID
+        └── items/              # Subcollection of user's items
+            └── {itemId}/       # Auto-generated document ID
+                ├── title: string
+                ├── description: string
+                ├── userId: string
+                ├── createdAt: Timestamp
+                └── updatedAt: Timestamp?
+```
+
+### Usage Example
+
+```dart
+// Navigate to CRUD Demo Screen
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => const CrudDemoScreen(),
+  ),
+);
+```
+
+### Best Practices Implemented
+
+✅ **Real-time Updates**: StreamBuilder provides instant UI refresh  
+✅ **User Authentication**: All operations require logged-in user  
+✅ **Security Rules**: Server-side access control prevents unauthorized access  
+✅ **Error Handling**: Try-catch blocks with user feedback  
+✅ **Form Validation**: Prevent empty or invalid data submission  
+✅ **Loading States**: CircularProgressIndicator during operations  
+✅ **Confirmation Dialogs**: Prevent accidental destructive actions  
+✅ **Timestamps**: Automatic tracking of creation and modification times  
+✅ **Subcollections**: Organized user-specific data structure  
+✅ **Immutable Models**: copyWith() method for safe updates
+
+### File Locations
+- [lib/models/note_item.dart](lib/models/note_item.dart) - Data model
+- [lib/services/crud_service.dart](lib/services/crud_service.dart) - CRUD operations
+- [lib/screens/crud_demo_screen.dart](lib/screens/crud_demo_screen.dart) - UI implementation
+- [firestore_rules_with_crud.rules](firestore_rules_with_crud.rules) - Security rules
+- [CRUD_IMPLEMENTATION_GUIDE.md](CRUD_IMPLEMENTATION_GUIDE.md) - Complete documentation
+- [CRUD_QUICK_REFERENCE.md](CRUD_QUICK_REFERENCE.md) - Quick reference guide
+
+### Testing Checklist
+
+- [ ] User can create new items
+- [ ] Items appear in list immediately after creation
+- [ ] User can edit existing items
+- [ ] Changes reflect in UI instantly
+- [ ] User can delete items with confirmation
+- [ ] Only authenticated users can access CRUD features
+- [ ] Each user sees only their own items (test with 2 accounts)
+- [ ] Form validation prevents empty submissions
+- [ ] Error messages display for failures
+- [ ] Loading indicators show during operations
+
+---
+
+## �🛠️ Technologies Used
+
+- **Flutter**: Cross-platform UI framework
 - **Dart**: Programming language
+- **Material Design 3**: Modern UI components
+
+### Firebase Services
+- **Firebase Authentication**: User signup, login, and session management
+- **Cloud Firestore**: NoSQL real-time database for products, orders, and user data
+- **Firebase Core**: Firebase SDK initialization
+
+### Google Maps & Location
+- **google_maps_flutter**: ^2.5.0 - Interactive maps with custom markers
+- **location**: ^5.0.0 - Basic location services
+- **geolocator**: ^10.1.0 - Advanced GPS tracking and geolocation
+
+### State Management & Architecture
+- **Provider Pattern**: Used in services (AuthService, CrudService)
+- **StreamBuilder**: Real-time UI updates from Firestore
+- **Service Layer Architecture**: Separation of business logic from UI
 
 ## 📝 License
 
