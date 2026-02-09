@@ -1735,6 +1735,7 @@ flutter run
 - **Google Maps Integration**: Interactive maps with farm locations
 - **Location Tracking**: Real-time GPS tracking and user location services
 - **CRUD Operations**: Complete Create, Read, Update, Delete functionality for user data
+- **State Management**: Provider-based reactive state across the entire app
 
 ### Firebase Integration
 - ✅ Email/Password Authentication
@@ -1750,6 +1751,14 @@ flutter run
 - ✅ Real-time GPS location tracking
 - ✅ User location permissions handling
 - ✅ Map type controls (normal, satellite, terrain)
+
+### State Management
+- ✅ Provider for scalable state management
+- ✅ Shopping cart state shared across screens
+- ✅ Favorites management with automatic UI updates
+- ✅ App-wide theme switching (light/dark mode)
+- ✅ No prop-drilling with context.watch/read
+- ✅ Reactive UI with ChangeNotifier pattern
 
 ## 🔥 Firebase Setup
 
@@ -3610,6 +3619,723 @@ Navigator.push(
 
 ---
 
+## 🔄 State Management with Provider
+
+### Overview
+
+Farm2Home uses **Provider** as its state management solution. Provider is a wrapper around Flutter's `InheritedWidget` that makes it easier to manage and share app state across the widget tree.
+
+**Why Provider?**
+- ✅ **Simplicity**: Easy to learn and implement
+- ✅ **Performance**: Rebuilds only widgets that need updates
+- ✅ **Scalability**: Works well for small to medium apps
+- ✅ **Official**: Recommended by the Flutter team
+- ✅ **Type-safe**: Compile-time safety with strong typing
+
+### Architecture
+
+The Provider pattern follows a unidirectional data flow:
+
+```
+┌─────────────────────────────────────────────────┐
+│                  Provider Tree                   │
+│  (Root of app - wraps MaterialApp)              │
+└──────────────────┬──────────────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────────────┐
+│              State Classes                       │
+│  - AuthProvider (User authentication)           │
+│  - ProductProvider (Product data)               │
+│  - CartProvider (Shopping cart)                 │
+└──────────────────┬──────────────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────────────┐
+│               UI Widgets                         │
+│  - Consume state with Consumer/context.watch    │
+│  - Update state by calling provider methods     │
+└─────────────────────────────────────────────────┘
+```
+
+### Setup Instructions
+
+#### 1. Add Provider Dependency
+
+In `pubspec.yaml`:
+
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.1
+```
+
+Run:
+```bash
+flutter pub get
+```
+
+#### 2. Create a Provider Class
+
+Example: `lib/providers/product_provider.dart`
+
+```dart
+import 'package:flutter/foundation.dart';
+import '../models/product.dart';
+import '../services/firestore_service.dart';
+
+class ProductProvider with ChangeNotifier {
+  final FirestoreService _firestoreService = FirestoreService();
+  
+  List<Product> _products = [];
+  bool _isLoading = false;
+  String? _error;
+  
+  // Getters
+  List<Product> get products => _products;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+  
+  // Fetch products from Firestore
+  Future<void> fetchProducts() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners(); // Notify UI to show loading
+    
+    try {
+      _products = await _firestoreService.getProducts();
+      _isLoading = false;
+      notifyListeners(); // Notify UI with data
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners(); // Notify UI with error
+    }
+  }
+  
+  // Add a new product
+  Future<void> addProduct(Product product) async {
+    try {
+      await _firestoreService.addProduct(product);
+      _products.add(product);
+      notifyListeners();
+    } catch (e) {
+      throw Exception('Failed to add product: $e');
+    }
+  }
+  
+  // Update a product
+  Future<void> updateProduct(Product product) async {
+    try {
+      await _firestoreService.updateProduct(product);
+      final index = _products.indexWhere((p) => p.id == product.id);
+      if (index != -1) {
+        _products[index] = product;
+        notifyListeners();
+      }
+    } catch (e) {
+      throw Exception('Failed to update product: $e');
+    }
+  }
+  
+  // Delete a product
+  Future<void> deleteProduct(String productId) async {
+    try {
+      await _firestoreService.deleteProduct(productId);
+      _products.removeWhere((p) => p.id == productId);
+      notifyListeners();
+    } catch (e) {
+      throw Exception('Failed to delete product: $e');
+    }
+  }
+}
+```
+
+#### 3. Wrap Your App with Provider
+
+In `lib/main.dart`:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/auth_provider.dart';
+import 'providers/product_provider.dart';
+import 'providers/cart_provider.dart';
+
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ProductProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+  
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Farm2Home',
+      home: const HomeScreen(),
+    );
+  }
+}
+```
+
+### Reading State in Widgets
+
+There are three main ways to read state from Provider:
+
+#### 1. Consumer Widget (Rebuilds only the Consumer)
+
+```dart
+class ProductList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ProductProvider>(
+      builder: (context, productProvider, child) {
+        if (productProvider.isLoading) {
+          return const CircularProgressIndicator();
+        }
+        
+        if (productProvider.error != null) {
+          return Text('Error: ${productProvider.error}');
+        }
+        
+        return ListView.builder(
+          itemCount: productProvider.products.length,
+          itemBuilder: (context, index) {
+            final product = productProvider.products[index];
+            return ListTile(
+              title: Text(product.name),
+              subtitle: Text('\$${product.price}'),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+```
+
+#### 2. context.watch (Rebuilds entire widget)
+
+```dart
+class ProductCount extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // This widget rebuilds when products change
+    final productCount = context.watch<ProductProvider>().products.length;
+    
+    return Text('Total Products: $productCount');
+  }
+}
+```
+
+#### 3. context.read (No rebuild, for calling methods)
+
+```dart
+class AddProductButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        // Use context.read to access provider without listening
+        final provider = context.read<ProductProvider>();
+        provider.addProduct(Product(
+          id: DateTime.now().toString(),
+          name: 'New Product',
+          price: 9.99,
+        ));
+      },
+      child: const Text('Add Product'),
+    );
+  }
+}
+```
+
+### Updating State
+
+#### Example: Add Product Form
+
+```dart
+class AddProductScreen extends StatefulWidget {
+  @override
+  State<AddProductScreen> createState() => _AddProductScreenState();
+}
+
+class _AddProductScreenState extends State<AddProductScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _priceController = TextEditingController();
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Add Product')),
+      body: Form(
+        key: _formKey,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Product Name'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a name';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _priceController,
+                decoration: const InputDecoration(labelText: 'Price'),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a price';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    final product = Product(
+                      id: DateTime.now().toString(),
+                      name: _nameController.text,
+                      price: double.parse(_priceController.text),
+                    );
+                    
+                    try {
+                      await context.read<ProductProvider>().addProduct(product);
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Product added!')),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: $e')),
+                      );
+                    }
+                  }
+                },
+                child: const Text('Add Product'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
+}
+```
+
+### Multi-Screen Shared State Example
+
+#### Scenario: Shopping Cart across multiple screens
+
+**1. Cart Provider** (`lib/providers/cart_provider.dart`):
+
+```dart
+class CartProvider with ChangeNotifier {
+  final Map<String, CartItem> _items = {};
+  
+  Map<String, CartItem> get items => {..._items};
+  
+  int get itemCount => _items.length;
+  
+  double get totalAmount {
+    return _items.values
+        .fold(0.0, (sum, item) => sum + (item.price * item.quantity));
+  }
+  
+  void addItem(String productId, String name, double price) {
+    if (_items.containsKey(productId)) {
+      _items.update(
+        productId,
+        (existing) => CartItem(
+          id: existing.id,
+          name: existing.name,
+          price: existing.price,
+          quantity: existing.quantity + 1,
+        ),
+      );
+    } else {
+      _items.putIfAbsent(
+        productId,
+        () => CartItem(
+          id: DateTime.now().toString(),
+          name: name,
+          price: price,
+          quantity: 1,
+        ),
+      );
+    }
+    notifyListeners();
+  }
+  
+  void removeItem(String productId) {
+    _items.remove(productId);
+    notifyListeners();
+  }
+  
+  void clear() {
+    _items.clear();
+    notifyListeners();
+  }
+}
+```
+
+**2. Product List Screen** (adds to cart):
+
+```dart
+class ProductListScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Products'),
+        actions: [
+          Consumer<CartProvider>(
+            builder: (context, cart, child) => Badge(
+              label: Text('${cart.itemCount}'),
+              child: IconButton(
+                icon: const Icon(Icons.shopping_cart),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => CartScreen()),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Consumer<ProductProvider>(
+        builder: (context, productProvider, child) {
+          return ListView.builder(
+            itemCount: productProvider.products.length,
+            itemBuilder: (context, index) {
+              final product = productProvider.products[index];
+              return ListTile(
+                title: Text(product.name),
+                subtitle: Text('\$${product.price}'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.add_shopping_cart),
+                  onPressed: () {
+                    context.read<CartProvider>().addItem(
+                      product.id,
+                      product.name,
+                      product.price,
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('${product.name} added to cart')),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+```
+
+**3. Cart Screen** (displays cart items):
+
+```dart
+class CartScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Shopping Cart')),
+      body: Consumer<CartProvider>(
+        builder: (context, cart, child) {
+          if (cart.itemCount == 0) {
+            return const Center(child: Text('Your cart is empty'));
+          }
+          
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: cart.items.length,
+                  itemBuilder: (context, index) {
+                    final item = cart.items.values.toList()[index];
+                    return ListTile(
+                      title: Text(item.name),
+                      subtitle: Text('${item.quantity} x \$${item.price}'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          cart.removeItem(cart.items.keys.toList()[index]);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      'Total: \$${cart.totalAmount.toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Checkout logic
+                        cart.clear();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Order placed!')),
+                        );
+                      },
+                      child: const Text('Checkout'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+```
+
+### Best Practices
+
+#### 1. Keep Providers Focused
+
+Each provider should manage a single concern:
+
+```dart
+✅ Good: Separate providers
+- AuthProvider (authentication)
+- ProductProvider (product data)
+- CartProvider (shopping cart)
+
+❌ Bad: One giant provider
+- AppProvider (everything mixed together)
+```
+
+#### 2. Use Private Fields with Public Getters
+
+```dart
+class ProductProvider with ChangeNotifier {
+  List<Product> _products = []; // Private
+  
+  List<Product> get products => _products; // Public getter
+}
+```
+
+#### 3. Always Call notifyListeners()
+
+Call after state changes to update UI:
+
+```dart
+void addProduct(Product product) {
+  _products.add(product);
+  notifyListeners(); // Don't forget this!
+}
+```
+
+#### 4. Handle Async Operations Properly
+
+```dart
+Future<void> fetchProducts() async {
+  _isLoading = true;
+  notifyListeners(); // Show loading indicator
+  
+  try {
+    _products = await _service.getProducts();
+  } catch (e) {
+    _error = e.toString();
+  } finally {
+    _isLoading = false;
+    notifyListeners(); // Hide loading indicator
+  }
+}
+```
+
+#### 5. Use context.read for Actions, context.watch for Data
+
+```dart
+// Reading data (widget rebuilds on changes)
+final products = context.watch<ProductProvider>().products;
+
+// Calling methods (no rebuild)
+context.read<ProductProvider>().addProduct(product);
+```
+
+#### 6. Dispose Resources
+
+```dart
+class ProductProvider with ChangeNotifier {
+  StreamSubscription? _subscription;
+  
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+}
+```
+
+### Common Issues and Solutions
+
+#### Issue 1: "Could not find the correct Provider"
+
+**Error:**
+```
+Error: Could not find the correct Provider<ProductProvider> above this Widget
+```
+
+**Solution:** Make sure the widget is inside the Provider tree:
+
+```dart
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ProductProvider(),
+      child: const MyApp(), // This and all children can access ProductProvider
+    ),
+  );
+}
+```
+
+#### Issue 2: Widget Not Rebuilding
+
+**Problem:** State changes but UI doesn't update.
+
+**Solutions:**
+
+1. Use `Consumer` or `context.watch`:
+```dart
+// ✅ This rebuilds
+Consumer<ProductProvider>(
+  builder: (context, provider, child) => Text('${provider.products.length}'),
+)
+
+// ❌ This doesn't rebuild
+final provider = context.read<ProductProvider>();
+Text('${provider.products.length}')
+```
+
+2. Make sure to call `notifyListeners()`:
+```dart
+void addProduct(Product product) {
+  _products.add(product);
+  notifyListeners(); // Essential!
+}
+```
+
+#### Issue 3: setState Called During Build
+
+**Error:**
+```
+setState() or markNeedsBuild() called during build
+```
+
+**Solution:** Use `WidgetsBinding.instance.addPostFrameCallback`:
+
+```dart
+@override
+void didChangeDependencies() {
+  super.didChangeDependencies();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    context.read<ProductProvider>().fetchProducts();
+  });
+}
+```
+
+Or use FutureProvider for initial data loading.
+
+#### Issue 4: Memory Leaks
+
+**Problem:** Provider not disposed properly.
+
+**Solution:** Override dispose method:
+
+```dart
+class ProductProvider with ChangeNotifier {
+  @override
+  void dispose() {
+    // Clean up resources
+    super.dispose();
+  }
+}
+```
+
+### File Locations in Farm2Home
+
+```
+lib/
+├── providers/
+│   ├── auth_provider.dart           # User authentication state
+│   ├── product_provider.dart        # Product CRUD operations
+│   └── cart_provider.dart           # Shopping cart state
+├── models/
+│   ├── product.dart                 # Product data model
+│   ├── cart_item.dart              # Cart item model
+│   └── user.dart                   # User data model
+├── services/
+│   └── firestore_service.dart      # Firestore operations
+└── main.dart                        # Provider setup with MultiProvider
+```
+
+### Testing Your State Management
+
+1. **Open the app** in your emulator/device
+2. **Navigate** to different screens
+3. **Add items** to cart from product list
+4. **Check cart badge** updates in real-time
+5. **Navigate to cart screen** - items persist
+6. **Delete items** - UI updates immediately
+7. **Close and reopen app** - state resets (unless using persistence)
+
+### Interactive Demo
+
+Try these actions to see Provider in action:
+
+1. Add a product → All product lists update instantly
+2. Add to cart → Cart badge updates on all screens
+3. Open cart from any screen → Same cart data
+4. Delete from cart → Updates reflect everywhere
+5. Sign out → All state clears appropriately
+
+### Additional Resources
+
+- **Official Docs**: https://pub.dev/packages/provider
+- **Flutter Documentation**: https://docs.flutter.dev/data-and-backend/state-mgmt/simple
+- **Video Tutorial**: https://www.youtube.com/watch?v=d_m5csmrf7I
+
+---
+
 ## �🛠️ Technologies Used
 
 - **Flutter**: Cross-platform UI framework
@@ -3627,9 +4353,12 @@ Navigator.push(
 - **geolocator**: ^10.1.0 - Advanced GPS tracking and geolocation
 
 ### State Management & Architecture
-- **Provider Pattern**: Used in services (AuthService, CrudService)
+- **provider**: ^6.1.0 - Scalable state management with ChangeNotifier
+- **CartService, FavoritesService, AppThemeService**: Reactive state classes
+- **MultiProvider**: App-wide state registration
 - **StreamBuilder**: Real-time UI updates from Firestore
 - **Service Layer Architecture**: Separation of business logic from UI
+- **context.watch/read/Consumer**: Efficient state access patterns
 
 ## 📝 License
 

@@ -702,6 +702,8 @@ Integrating-Google-Maps-SDK
       url: "https://pub.dev"
     source: hosted
     version: "1.17.0"
+ Using-Provider-for-scalable-state-management
+
   mime:
     dependency: transitive
     description:
@@ -710,6 +712,7 @@ Integrating-Google-Maps-SDK
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+ main
   nested:
     dependency: transitive
     description:
@@ -742,8 +745,10 @@ Integrating-Google-Maps-SDK
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+ Using-Provider-for-scalable-state-management
  Integrating-Google-Maps-SDK
 
+ main
   provider:
     dependency: "direct main"
     description:
@@ -752,7 +757,10 @@ Integrating-Google-Maps-SDK
       url: "https://pub.dev"
     source: hosted
     version: "6.1.5+1"
+ Using-Provider-for-scalable-state-management
+
 main
+ main
   sanitize_html:
     dependency: transitive
     description:

@@ -26,6 +26,12 @@ import 'screens/fcm_demo_screen.dart';
 import 'screens/secure_profile_screen.dart';
 import 'screens/location_preview_screen.dart';
 import 'screens/splash_screen.dart';
+ Using-Provider-for-scalable-state-management
+import 'screens/provider_demo_screen.dart';
+import 'services/cart_service.dart';
+import 'services/favorites_service.dart';
+import 'services/app_theme_service.dart';
+
 import 'screens/my_notes_screen.dart';
 import 'screens/products_favorites_screen.dart';
 import 'screens/favorites_sync_screen.dart';
@@ -33,9 +39,10 @@ import 'screens/favorites_sync_screen.dart';
 import 'services/cart_service.dart';
 import 'providers/favorites_provider.dart';
 
+ main
 import 'screens/home_screen.dart';
 
-/// Entry point of the Farm2Home application
+ Entry point of the Farm2Home application
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -60,6 +67,69 @@ class Farm2HomeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+ Using-Provider-for-scalable-state-management
+    // MultiProvider wraps the app and provides multiple state objects
+    // All child widgets can access these providers using context.watch or context.read
+    return MultiProvider(
+      providers: [
+        // CartService - Manages shopping cart state across the app
+        ChangeNotifierProvider(create: (_) => CartService()),
+        
+        // FavoritesService - Manages user's favorite products
+        ChangeNotifierProvider(create: (_) => FavoritesService()),
+        
+        // AppThemeService - Manages app theme (light/dark mode)
+        ChangeNotifierProvider(create: (_) => AppThemeService()),
+      ],
+      child: Consumer<AppThemeService>(
+        builder: (context, themeService, _) {
+          return MaterialApp(
+            title: 'Farm2Home',
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              // Green theme matching agricultural/farm concept
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.green,
+                brightness: Brightness.light,
+              ),
+              useMaterial3: true,
+            ),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.green,
+                brightness: Brightness.dark,
+              ),
+              useMaterial3: true,
+            ),
+            themeMode: themeService.themeMode, // Dynamic theme switching
+            // Initial route - starts with authentication check
+            initialRoute: '/',
+            // Named routes for navigation
+            routes: {
+              '/': (context) => const AuthWrapper(),
+              '/welcome': (context) => const WelcomeScreen(),
+              '/login': (context) => const LoginScreen(),
+              '/signup': (context) => const SignUpScreen(),
+              '/home': (context) => HomeScreen(cartService: context.read<CartService>()),
+              '/products': (context) => ProductsScreen(cartService: context.read<CartService>()),
+              '/cart': (context) => CartScreen(cartService: context.read<CartService>()),
+              '/responsive-layout': (context) => const ResponsiveLayoutScreen(),
+              '/scrollable-views': (context) => const ScrollableViewsScreen(),
+              '/user-input-form': (context) => const UserInputForm(),
+              '/state-management': (context) => const StateManagementDemo(),
+              '/reusable-widgets': (context) => const ReusableWidgetsDemo(),
+              '/responsive-design': (context) => const ResponsiveDesignDemo(),
+              '/responsive-product-grid': (context) => const ResponsiveProductGrid(),
+              '/responsive-form': (context) => const ResponsiveFormLayout(),
+              '/assets-management': (context) => const AssetsManagementDemo(),
+              '/animations': (context) => const AnimationsDemoScreen(),
+              '/provider-demo': (context) => const ProviderDemoScreen(),
+            },
+            onGenerateRoute: (settings) => _createPageTransition(settings),
+          );
+        },
+      ),
+
     return MaterialApp(
       title: 'Farm2Home',
       debugShowCheckedModeBanner: false,
@@ -120,6 +190,7 @@ class Farm2HomeApp extends StatelessWidget {
       },
       onGenerateRoute: (settings) =>
           _createPageTransition(settings),
+ main
     );
   }
 }
@@ -159,6 +230,10 @@ class AuthWrapper extends StatelessWidget {
           return const SplashScreen();
         }
 
+ Using-Provider-for-scalable-state-management
+        // Check for errorscontext.read<CartService>
+
+ main
         if (snapshot.hasError) {
           return Scaffold(
             body: Center(
