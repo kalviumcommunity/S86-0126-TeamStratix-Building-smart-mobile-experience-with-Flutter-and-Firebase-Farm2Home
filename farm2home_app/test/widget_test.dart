@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:farm2home_app/main.dart';
+import 'package:farm2home_app/services/app_theme_service.dart';
 
 void main() {
   testWidgets('App loads and shows login screen', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const Farm2HomeApp());
+    final themeService = AppThemeService();
+    await tester.pumpWidget(Farm2HomeApp(themeService: themeService));
 
     // Wait for Firebase initialization and widgets to build
     await tester.pumpAndSettle();

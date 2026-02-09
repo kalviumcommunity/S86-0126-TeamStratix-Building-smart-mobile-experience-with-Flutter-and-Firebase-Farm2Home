@@ -16,6 +16,7 @@ import geolocator_apple
 Integrating-Google-Maps-SDK
  main
 import location
+import shared_preferences_foundation
 
 import firebase_messaging
 import firebase_storage
@@ -35,11 +36,15 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
  Integrating-Google-Maps-SDK
 main
   LocationPlugin.register(with: registry.registrar(forPlugin: "LocationPlugin"))
+ creating-themed-UIs
+  SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))
+
 
   FLTFirebaseMessagingPlugin.register(with: registry.registrar(forPlugin: "FLTFirebaseMessagingPlugin"))
   FLTFirebaseStoragePlugin.register(with: registry.registrar(forPlugin: "FLTFirebaseStoragePlugin"))
   FlutterLocalNotificationsPlugin.register(with: registry.registrar(forPlugin: "FlutterLocalNotificationsPlugin"))
   GeolocatorPlugin.register(with: registry.registrar(forPlugin: "GeolocatorPlugin"))
   FLTGoogleSignInPlugin.register(with: registry.registrar(forPlugin: "FLTGoogleSignInPlugin"))
+ main
  main
 }

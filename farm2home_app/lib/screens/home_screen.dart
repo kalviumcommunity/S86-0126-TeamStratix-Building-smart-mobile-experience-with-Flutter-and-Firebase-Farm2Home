@@ -163,6 +163,15 @@ class HomeScreen extends StatelessWidget {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.palette, color: Colors.purpleAccent),
+              title: const Text('Theming & Dark Mode'),
+              subtitle: const Text('Custom themes with persistence'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/theming-demo');
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.widgets, color: Colors.teal),
               title: const Text('Reusable Widgets'),
               subtitle: const Text('Custom widgets for modular design'),

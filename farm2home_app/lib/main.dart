@@ -32,7 +32,9 @@ import 'screens/form_validation_demo_screen.dart';
 import 'screens/multi_step_form_screen.dart';
 import 'screens/tab_navigation_demo_screen.dart';
 import 'screens/advanced_tab_navigation_screen.dart';
+import 'screens/theming_demo_screen.dart';
 import 'services/cart_service.dart';
+import 'styles/app_theme.dart';
 import 'services/favorites_service.dart';
 import 'services/app_theme_service.dart';
 
@@ -49,6 +51,15 @@ import 'screens/home_screen.dart';
  Entry point of the Farm2Home application
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+ creating-themed-UIs
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Initialize and configure theme service before running the app
+  final themeService = AppThemeService();
+  await themeService.initialize();
+
+  runApp(Farm2HomeApp(themeService: themeService));
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -63,11 +74,14 @@ void main() async {
       child: const Farm2HomeApp(),
     ),
   );
+ main
 }
 
 /// Root widget of the Farm2Home application
 class Farm2HomeApp extends StatelessWidget {
-  const Farm2HomeApp({super.key});
+  final AppThemeService themeService;
+
+  const Farm2HomeApp({super.key, required this.themeService});
 
   @override
   Widget build(BuildContext context) {
@@ -82,30 +96,20 @@ class Farm2HomeApp extends StatelessWidget {
         // FavoritesService - Manages user's favorite products
         ChangeNotifierProvider(create: (_) => FavoritesService()),
 
-        // AppThemeService - Manages app theme (light/dark mode)
-        ChangeNotifierProvider(create: (_) => AppThemeService()),
+        // AppThemeService - Manages app theme (light/dark mode) with persistence
+        ChangeNotifierProvider.value(value: themeService),
       ],
       child: Consumer<AppThemeService>(
         builder: (context, themeService, _) {
           return MaterialApp(
             title: 'Farm2Home',
             debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              // Green theme matching agricultural/farm concept
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.green,
-                brightness: Brightness.light,
-              ),
-              useMaterial3: true,
-            ),
-            darkTheme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.green,
-                brightness: Brightness.dark,
-              ),
-              useMaterial3: true,
-            ),
-            themeMode: themeService.themeMode, // Dynamic theme switching
+            // Custom light theme with Material 3 design
+            theme: AppTheme.lightTheme,
+            // Custom dark theme with Material 3 design
+            darkTheme: AppTheme.darkTheme,
+            // Dynamic theme switching with persistence
+            themeMode: themeService.themeMode,
             // Initial route - starts with authentication check
             initialRoute: '/',
             // Named routes for navigation
@@ -139,6 +143,7 @@ class Farm2HomeApp extends StatelessWidget {
                   const TabNavigationDemoScreen(),
               '/advanced-tab-navigation': (context) =>
                   const AdvancedTabNavigationScreen(),
+              '/theming-demo': (context) => const ThemingDemoScreen(),
             },
             onGenerateRoute: (settings) => _createPageTransition(settings),
           );
