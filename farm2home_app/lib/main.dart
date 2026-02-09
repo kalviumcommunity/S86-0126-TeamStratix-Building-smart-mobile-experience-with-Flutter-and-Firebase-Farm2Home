@@ -22,6 +22,8 @@ import 'screens/splash_screen.dart';
 import 'screens/provider_demo_screen.dart';
 import 'screens/form_validation_demo_screen.dart';
 import 'screens/multi_step_form_screen.dart';
+import 'screens/tab_navigation_demo_screen.dart';
+import 'screens/advanced_tab_navigation_screen.dart';
 import 'services/cart_service.dart';
 import 'services/favorites_service.dart';
 import 'services/app_theme_service.dart';
@@ -103,6 +105,10 @@ class Farm2HomeApp extends StatelessWidget {
               '/form-validation-demo': (context) =>
                   const FormValidationDemoScreen(),
               '/multi-step-form': (context) => const MultiStepFormScreen(),
+              '/tab-navigation-demo': (context) =>
+                  const TabNavigationDemoScreen(),
+              '/advanced-tab-navigation': (context) =>
+                  const AdvancedTabNavigationScreen(),
             },
             onGenerateRoute: (settings) => _createPageTransition(settings),
           );

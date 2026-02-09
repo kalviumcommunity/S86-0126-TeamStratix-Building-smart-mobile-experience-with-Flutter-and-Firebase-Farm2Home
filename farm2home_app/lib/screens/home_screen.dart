@@ -140,6 +140,29 @@ class HomeScreen extends StatelessWidget {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.tab, color: Colors.blueAccent),
+              title: const Text('Tab Navigation'),
+              subtitle: const Text('BottomNavigationBar with tab switching'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/tab-navigation-demo');
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.view_carousel,
+                color: Colors.deepOrangeAccent,
+              ),
+              title: const Text('Advanced Tab Navigation'),
+              subtitle: const Text(
+                'PageView with state preservation & swipe gestures',
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/advanced-tab-navigation');
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.widgets, color: Colors.teal),
               title: const Text('Reusable Widgets'),
               subtitle: const Text('Custom widgets for modular design'),
