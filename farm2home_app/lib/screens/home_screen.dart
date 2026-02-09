@@ -20,10 +20,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             const Text('Farm2Home'),
             if (user != null)
-              Text(
-                user.email ?? '',
-                style: const TextStyle(fontSize: 12),
-              ),
+              Text(user.email ?? '', style: const TextStyle(fontSize: 12)),
           ],
         ),
         backgroundColor: Colors.green.shade700,
@@ -37,15 +34,15 @@ class HomeScreen extends StatelessWidget {
               try {
                 await AuthService().logout();
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Logged out')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('Logged out')));
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.toString())),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.toString())));
                 }
               }
             },
@@ -77,10 +74,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             const Text(
               'Demo Screens',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             ListTile(
@@ -117,6 +111,32 @@ class HomeScreen extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/user-input-form');
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.verified_user,
+                color: Colors.deepOrange,
+              ),
+              title: const Text('Advanced Form Validation'),
+              subtitle: const Text(
+                'Complex validation patterns & multi-field validation',
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/form-validation-demo');
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.checklist_rtl,
+                color: Colors.deepPurple,
+              ),
+              title: const Text('Multi-Step Form'),
+              subtitle: const Text('Step-by-step form with progress tracking'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/multi-step-form');
               },
             ),
             ListTile(
@@ -233,4 +253,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-

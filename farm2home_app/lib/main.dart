@@ -28,6 +28,8 @@ import 'screens/location_preview_screen.dart';
 import 'screens/splash_screen.dart';
  Using-Provider-for-scalable-state-management
 import 'screens/provider_demo_screen.dart';
+import 'screens/form_validation_demo_screen.dart';
+import 'screens/multi_step_form_screen.dart';
 import 'services/cart_service.dart';
 import 'services/favorites_service.dart';
 import 'services/app_theme_service.dart';
@@ -74,10 +76,10 @@ class Farm2HomeApp extends StatelessWidget {
       providers: [
         // CartService - Manages shopping cart state across the app
         ChangeNotifierProvider(create: (_) => CartService()),
-        
+
         // FavoritesService - Manages user's favorite products
         ChangeNotifierProvider(create: (_) => FavoritesService()),
-        
+
         // AppThemeService - Manages app theme (light/dark mode)
         ChangeNotifierProvider(create: (_) => AppThemeService()),
       ],
@@ -110,20 +112,27 @@ class Farm2HomeApp extends StatelessWidget {
               '/welcome': (context) => const WelcomeScreen(),
               '/login': (context) => const LoginScreen(),
               '/signup': (context) => const SignUpScreen(),
-              '/home': (context) => HomeScreen(cartService: context.read<CartService>()),
-              '/products': (context) => ProductsScreen(cartService: context.read<CartService>()),
-              '/cart': (context) => CartScreen(cartService: context.read<CartService>()),
+              '/home': (context) =>
+                  HomeScreen(cartService: context.read<CartService>()),
+              '/products': (context) =>
+                  ProductsScreen(cartService: context.read<CartService>()),
+              '/cart': (context) =>
+                  CartScreen(cartService: context.read<CartService>()),
               '/responsive-layout': (context) => const ResponsiveLayoutScreen(),
               '/scrollable-views': (context) => const ScrollableViewsScreen(),
               '/user-input-form': (context) => const UserInputForm(),
               '/state-management': (context) => const StateManagementDemo(),
               '/reusable-widgets': (context) => const ReusableWidgetsDemo(),
               '/responsive-design': (context) => const ResponsiveDesignDemo(),
-              '/responsive-product-grid': (context) => const ResponsiveProductGrid(),
+              '/responsive-product-grid': (context) =>
+                  const ResponsiveProductGrid(),
               '/responsive-form': (context) => const ResponsiveFormLayout(),
               '/assets-management': (context) => const AssetsManagementDemo(),
               '/animations': (context) => const AnimationsDemoScreen(),
               '/provider-demo': (context) => const ProviderDemoScreen(),
+              '/form-validation-demo': (context) =>
+                  const FormValidationDemoScreen(),
+              '/multi-step-form': (context) => const MultiStepFormScreen(),
             },
             onGenerateRoute: (settings) => _createPageTransition(settings),
           );
