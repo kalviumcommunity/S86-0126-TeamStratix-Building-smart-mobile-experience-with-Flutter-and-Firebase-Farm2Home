@@ -97,6 +97,7 @@ class _MapScreenState extends State<MapScreen> {
 
       _mapController.animateCamera(CameraUpdate.newCameraPosition(position));
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error getting location: $e')),
       );

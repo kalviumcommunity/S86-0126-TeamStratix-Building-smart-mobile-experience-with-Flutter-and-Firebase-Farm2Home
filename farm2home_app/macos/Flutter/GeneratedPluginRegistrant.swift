@@ -10,7 +10,11 @@ import cloud_functions
 import file_selector_macos
 import firebase_auth
 import firebase_core
+ implementing-user-location-access
+import geolocator_apple
+
 Integrating-Google-Maps-SDK
+ main
 import location
 
 import firebase_messaging
@@ -26,7 +30,10 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FileSelectorPlugin.register(with: registry.registrar(forPlugin: "FileSelectorPlugin"))
   FLTFirebaseAuthPlugin.register(with: registry.registrar(forPlugin: "FLTFirebaseAuthPlugin"))
   FLTFirebaseCorePlugin.register(with: registry.registrar(forPlugin: "FLTFirebaseCorePlugin"))
+ implementing-user-location-access
+  GeolocatorPlugin.register(with: registry.registrar(forPlugin: "GeolocatorPlugin"))
  Integrating-Google-Maps-SDK
+main
   LocationPlugin.register(with: registry.registrar(forPlugin: "LocationPlugin"))
 
   FLTFirebaseMessagingPlugin.register(with: registry.registrar(forPlugin: "FLTFirebaseMessagingPlugin"))

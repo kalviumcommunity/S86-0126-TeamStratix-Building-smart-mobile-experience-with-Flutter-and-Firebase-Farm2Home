@@ -25,6 +25,7 @@ The following dependencies have been added to `pubspec.yaml`:
 dependencies:
   google_maps_flutter: ^2.5.0  # Google Maps integration
   location: ^5.0.0              # Location services
+  geolocator: ^10.1.0           # Advanced location tracking
 ```
 
 Run to install:
@@ -340,12 +341,98 @@ Set<Circle> circles = {
 
 ---
 
+## User Location & Live Tracking
+
+### Enhanced Location Features
+
+The app now includes advanced location tracking capabilities using the `geolocator` package. See the complete implementation in `lib/screens/location_tracking_screen.dart`.
+
+### New Dependencies
+
+```yaml
+dependencies:
+  geolocator: ^10.1.0  # Advanced location tracking
+```
+
+### Key Features
+
+#### 1. **Real-Time Location Tracking**
+```dart
+Geolocator.getPositionStream(
+  locationSettings: LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: 10, // Update every 10 meters
+  ),
+).listen((Position position) {
+  // Update user position on map
+});
+```
+
+#### 2. **Permission Handling**
+```dart
+LocationPermission permission = await Geolocator.checkPermission();
+if (permission == LocationPermission.denied) {
+  permission = await Geolocator.requestPermission();
+}
+```
+
+#### 3. **Get Current Position**
+```dart
+Position position = await Geolocator.getCurrentPosition(
+  desiredAccuracy: LocationAccuracy.high,
+);
+```
+
+#### 4. **Distance Calculations**
+```dart
+double distance = Geolocator.distanceBetween(
+  startLat, startLng,
+  endLat, endLng,
+); // Returns distance in meters
+```
+
+#### 5. **Custom Markers**
+```dart
+// Load custom icon from assets
+BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
+  const ImageConfiguration(size: Size(48, 48)),
+  'assets/icons/custom_pin.png',
+);
+
+Marker(
+  markerId: MarkerId('custom'),
+  position: LatLng(lat, lng),
+  icon: customIcon,
+)
+```
+
+### Location Tracking Screen Features
+
+✅ Real-time GPS position updates  
+✅ Live tracking with play/pause controls  
+✅ User location marker (blue)  
+✅ Custom markers for farms, markets, delivery points  
+✅ Distance calculation to any marker  
+✅ Tap map to add custom markers  
+✅ Status indicators  
+✅ Location accuracy display  
+✅ Battery-optimized tracking  
+
+### Complete Guide
+
+For detailed implementation and examples, see:
+📄 **[LOCATION_TRACKING_GUIDE.md](LOCATION_TRACKING_GUIDE.md)**
+
+---
+
 ## Additional Resources
 
 - 📦 [google_maps_flutter Package](https://pub.dev/packages/google_maps_flutter)
-- 📦 [location Package](https://pub.dev/packages/location)
+- 📦 [geolocator Package](https://pub.dev/packages/geolocator)
 - 🌐 [Google Maps Platform Docs](https://developers.google.com/maps)
 - 🔑 [Google Cloud Console](https://console.cloud.google.com)
+- 📖 [Flutter Location Services Guide](https://flutter.dev/docs/development/data-and-backend/location)
+- 📄 [Location Tracking Guide](LOCATION_TRACKING_GUIDE.md
 - 📖 [Flutter Location Services Guide](https://flutter.dev/docs/development/data-and-backend/location)
 
 ---
@@ -354,7 +441,9 @@ Set<Circle> circles = {
 
 1. **Replace placeholder API keys** with your actual Google Maps API keys
 2. **Test on physical devices** to verify location features
-3. **Implement custom markers** for farm locations, delivery points, etc.
+3. **Implement custom markers** for farm locations, delivery 
+6. **Try the location tracking screen** for advanced features (`location_tracking_screen.dart`)
+7. **Add custom marker icons** to the assets folderpoints, etc.
 4. **Add route tracking** for delivery personnel
 5. **Integrate with Firebase** for real-time location updates
 

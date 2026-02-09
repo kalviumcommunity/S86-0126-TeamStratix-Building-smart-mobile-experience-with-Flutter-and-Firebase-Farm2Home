@@ -140,10 +140,14 @@ farm2home_app/
 
 ### Location Services
 - ✅ Interactive Google Maps
-- ✅ Real-time location tracking
-- ✅ Custom markers and info windows
-- ✅ Pan, zoom, and gesture controls
-- ✅ Location permission handling
+- ✅ Real-time GPS location tracking
+- ✅ Live position updates (10m accuracy)
+- ✅ Custom markers with info windows
+- ✅ Distance calculations between points
+- ✅ Pan, zoom, rotate, and tilt gestures
+- ✅ Location permission handling (Android & iOS)
+- ✅ Battery-optimized tracking
+- ✅ Custom marker icons support
 
 ---
 
@@ -346,11 +350,15 @@ The Farm2Home app now includes full Google Maps integration, enabling location-b
 
 ### Features Implemented
 - ✅ Interactive Google Maps widget
-- ✅ Real-time user location tracking
-- ✅ Custom marker placement
+- ✅ Real-time user location tracking with GPS
+- ✅ Live position updates (Stream-based)
+- ✅ Custom marker placement and management
 - ✅ Camera position controls and animations
-- ✅ Gesture-based interactions (pan, zoom, rotate)
+- ✅ Gesture-based interactions (pan, zoom, rotate, tilt)
 - ✅ Location permissions handling for Android and iOS
+- ✅ Distance calculations between points
+- ✅ Custom marker icons support
+- ✅ Battery-optimized location tracking
 
 ### Quick Start
 
@@ -374,14 +382,25 @@ GMSServices.provideAPIKey("YOUR_GOOGLE_MAPS_API_KEY_HERE")
 3. Create credentials and copy your API key
 4. Replace placeholders in configuration files
 
-#### 3. Access Map Screen
+#### 3. Access Map Screens
+
+**Basic Map Screen:**
 ```dart
 import 'package:farm2home_app/screens/map_screen.dart';
 
-// Navigate to map
 Navigator.push(
   context,
   MaterialPageRoute(builder: (context) => const MapScreen()),
+);
+```
+
+**Advanced Location Tracking Screen:**
+```dart
+import 'package:farm2home_app/screens/location_tracking_screen.dart';
+
+Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => const LocationTrackingScreen()),
 );
 ```
 
@@ -401,8 +420,7 @@ GoogleMap(
 ```dart
 GoogleMap(
   myLocationEnabled: true,
-  myGoogle Maps**: Location and mapping services
-- **LocationButtonEnabled: true,
+  myLocationButtonEnabled: true,
 )
 ```
 
@@ -431,13 +449,37 @@ GoogleMap(
 dependencies:
   google_maps_flutter: ^2.5.0  # Core maps functionality
   location: ^5.0.0              # Location services
+  geolocator: ^10.1.0           # Advanced location tracking
 ```
+
+### Two Map Screens Available
+
+#### 1. MapScreen (Basic)
+- Interactive map with markers
+- User location display
+- Tap to add markers
+- Camera animations
+
+#### 2. LocationTrackingScreen (Advanced)
+- Real-time GPS tracking
+- Live position updates
+- Distance calculations
+- Custom marker icons
+- Play/pause tracking controls
+- Status indicators
+- Battery-optimized
 
 ### Platform Configuration
 
 **Permissions Configured:**
 - Android: `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `INTERNET`
 - iOS: `NSLocationWhenInUseUsageDescription`, `NSLocationAlwaysUsageDescription`
+
+### Complete Documentation
+For detailed setup instructions, troubleshooting, and advanced features, see:
+- 📄 **[GOOGLE_MAPS_INTEGRATION.md](farm2home_app/GOOGLE_MAPS_INTEGRATION.md)** - Complete setup guide
+- 📄 **[LOCATION_TRACKING_GUIDE.md](farm2home_app/LOCATION_TRACKING_GUIDE.md)** - User location & markers guide
+- 📄 **[GOOGLE_MAPS_QUICK_REFERENCE.md](farm2home_app/GOOGLE_MAPS_QUICK_REFERENCE.md)** - Quick reference
 
 ### Complete Documentation
 For detailed setup instructions, troubleshooting, and advanced features, see:
@@ -515,6 +557,7 @@ For detailed setup instructions, troubleshooting, and advanced features, see:
 - **Flutter**: UI framework
 - **Firebase Authentication**: User management
 - **Cloud Firestore**: NoSQL database
+- **Google Maps**: Location and mapping services (google_maps_flutter, geolocator)
 - **Material Design 3**: UI components
 - **Dart**: Programming language
 
