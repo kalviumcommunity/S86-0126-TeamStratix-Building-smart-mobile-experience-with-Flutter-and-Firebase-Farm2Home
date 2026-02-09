@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart'; // SignUpScreen class
@@ -18,7 +19,10 @@ import 'screens/responsive_form_layout.dart';
 import 'screens/assets_management_demo.dart';
 import 'screens/animations_demo_screen.dart';
 import 'screens/splash_screen.dart';
+import 'screens/provider_demo_screen.dart';
 import 'services/cart_service.dart';
+import 'services/favorites_service.dart';
+import 'services/app_theme_service.dart';
 import 'screens/home_screen.dart';
 
 /// Entry point of the Farm2Home application
@@ -34,40 +38,67 @@ class Farm2HomeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Farm2Home',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        // Green theme matching agricultural/farm concept
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.green,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
+    // MultiProvider wraps the app and provides multiple state objects
+    // All child widgets can access these providers using context.watch or context.read
+    return MultiProvider(
+      providers: [
+        // CartService - Manages shopping cart state across the app
+        ChangeNotifierProvider(create: (_) => CartService()),
+        
+        // FavoritesService - Manages user's favorite products
+        ChangeNotifierProvider(create: (_) => FavoritesService()),
+        
+        // AppThemeService - Manages app theme (light/dark mode)
+        ChangeNotifierProvider(create: (_) => AppThemeService()),
+      ],
+      child: Consumer<AppThemeService>(
+        builder: (context, themeService, _) {
+          return MaterialApp(
+            title: 'Farm2Home',
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              // Green theme matching agricultural/farm concept
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.green,
+                brightness: Brightness.light,
+              ),
+              useMaterial3: true,
+            ),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.green,
+                brightness: Brightness.dark,
+              ),
+              useMaterial3: true,
+            ),
+            themeMode: themeService.themeMode, // Dynamic theme switching
+            // Initial route - starts with authentication check
+            initialRoute: '/',
+            // Named routes for navigation
+            routes: {
+              '/': (context) => const AuthWrapper(),
+              '/welcome': (context) => const WelcomeScreen(),
+              '/login': (context) => const LoginScreen(),
+              '/signup': (context) => const SignUpScreen(),
+              '/home': (context) => HomeScreen(cartService: context.read<CartService>()),
+              '/products': (context) => ProductsScreen(cartService: context.read<CartService>()),
+              '/cart': (context) => CartScreen(cartService: context.read<CartService>()),
+              '/responsive-layout': (context) => const ResponsiveLayoutScreen(),
+              '/scrollable-views': (context) => const ScrollableViewsScreen(),
+              '/user-input-form': (context) => const UserInputForm(),
+              '/state-management': (context) => const StateManagementDemo(),
+              '/reusable-widgets': (context) => const ReusableWidgetsDemo(),
+              '/responsive-design': (context) => const ResponsiveDesignDemo(),
+              '/responsive-product-grid': (context) => const ResponsiveProductGrid(),
+              '/responsive-form': (context) => const ResponsiveFormLayout(),
+              '/assets-management': (context) => const AssetsManagementDemo(),
+              '/animations': (context) => const AnimationsDemoScreen(),
+              '/provider-demo': (context) => const ProviderDemoScreen(),
+            },
+            onGenerateRoute: (settings) => _createPageTransition(settings),
+          );
+        },
       ),
-      // Initial route - starts with authentication check
-      initialRoute: '/',
-      // Named routes for navigation
-      routes: {
-        '/': (context) => const AuthWrapper(),
-        '/welcome': (context) => const WelcomeScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const SignUpScreen(),
-        '/home': (context) => HomeScreen(cartService: CartService()),
-        '/products': (context) => ProductsScreen(cartService: CartService()),
-        '/cart': (context) => CartScreen(cartService: CartService()),
-        '/responsive-layout': (context) => const ResponsiveLayoutScreen(),
-        '/scrollable-views': (context) => const ScrollableViewsScreen(),
-        '/user-input-form': (context) => const UserInputForm(),
-        '/state-management': (context) => const StateManagementDemo(),
-        '/reusable-widgets': (context) => const ReusableWidgetsDemo(),
-        '/responsive-design': (context) => const ResponsiveDesignDemo(),
-        '/responsive-product-grid': (context) => const ResponsiveProductGrid(),
-        '/responsive-form': (context) => const ResponsiveFormLayout(),
-        '/assets-management': (context) => const AssetsManagementDemo(),
-        '/animations': (context) => const AnimationsDemoScreen(),
-      },
-      onGenerateRoute: (settings) => _createPageTransition(settings),
     );
   }
 }
@@ -114,7 +145,7 @@ class AuthWrapper extends StatelessWidget {
           return const SplashScreen();
         }
 
-        // Check for errors
+        // Check for errorscontext.read<CartService>
         if (snapshot.hasError) {
           return Scaffold(
             body: Center(
