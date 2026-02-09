@@ -129,6 +129,7 @@ farm2home_app/
 - **Shopping Cart**: Add items, manage quantities, and checkout
 - **Real-time Database**: Firestore integration for user data and orders
 - **User Profile**: View account details and logout
+- **Google Maps Integration**: Interactive maps with location tracking and markers
 
 ### Firebase Integration
 - ✅ Email/Password Authentication
@@ -136,6 +137,13 @@ farm2home_app/
 - ✅ Real-time order management
 - ✅ User favorites tracking
 - ✅ Automatic data persistence
+
+### Location Services
+- ✅ Interactive Google Maps
+- ✅ Real-time location tracking
+- ✅ Custom markers and info windows
+- ✅ Pan, zoom, and gesture controls
+- ✅ Location permission handling
 
 ---
 
@@ -328,6 +336,120 @@ orders/
             ├── createdAt: timestamp
             └── updatedAt: timestamp
 ```
+
+---
+
+## 🗺️ Google Maps Integration
+
+### Overview
+The Farm2Home app now includes full Google Maps integration, enabling location-based features essential for delivery tracking, farm location discovery, and navigation services.
+
+### Features Implemented
+- ✅ Interactive Google Maps widget
+- ✅ Real-time user location tracking
+- ✅ Custom marker placement
+- ✅ Camera position controls and animations
+- ✅ Gesture-based interactions (pan, zoom, rotate)
+- ✅ Location permissions handling for Android and iOS
+
+### Quick Start
+
+#### 1. Configure API Keys
+
+**Android**: Update `android/app/src/main/AndroidManifest.xml`
+```xml
+<meta-data
+    android:name="com.google.android.geo.API_KEY"
+    android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE"/>
+```
+
+**iOS**: Update `ios/Runner/AppDelegate.swift`
+```swift
+GMSServices.provideAPIKey("YOUR_GOOGLE_MAPS_API_KEY_HERE")
+```
+
+#### 2. Get Your API Key
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Enable **Maps SDK for Android** and **Maps SDK for iOS**
+3. Create credentials and copy your API key
+4. Replace placeholders in configuration files
+
+#### 3. Access Map Screen
+```dart
+import 'package:farm2home_app/screens/map_screen.dart';
+
+// Navigate to map
+Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => const MapScreen()),
+);
+```
+
+### Map Capabilities
+
+#### Basic Map Display
+```dart
+GoogleMap(
+  initialCameraPosition: CameraPosition(
+    target: LatLng(37.7749, -122.4194),
+    zoom: 12,
+  ),
+)
+```
+
+#### User Location Tracking
+```dart
+GoogleMap(
+  myLocationEnabled: true,
+  myGoogle Maps**: Location and mapping services
+- **LocationButtonEnabled: true,
+)
+```
+
+#### Adding Markers
+```dart
+GoogleMap(
+  markers: {
+    Marker(
+      markerId: MarkerId('farm1'),
+      position: LatLng(37.7749, -122.4194),
+      infoWindow: InfoWindow(title: 'Farm Location'),
+    ),
+  },
+)
+```
+
+### Use Cases for Farm2Home
+- **Farm Location Mapping**: Show all registered farms on a map
+- **Delivery Tracking**: Real-time tracking of delivery personnel
+- **Route Planning**: Optimize delivery routes
+- **Geofencing**: Notify users when deliveries are nearby
+- **Customer Location**: Help farmers find customer delivery addresses
+
+### Dependencies Added
+```yaml
+dependencies:
+  google_maps_flutter: ^2.5.0  # Core maps functionality
+  location: ^5.0.0              # Location services
+```
+
+### Platform Configuration
+
+**Permissions Configured:**
+- Android: `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `INTERNET`
+- iOS: `NSLocationWhenInUseUsageDescription`, `NSLocationAlwaysUsageDescription`
+
+### Complete Documentation
+For detailed setup instructions, troubleshooting, and advanced features, see:
+📄 **[GOOGLE_MAPS_INTEGRATION.md](farm2home_app/GOOGLE_MAPS_INTEGRATION.md)**
+
+### Common Issues
+| Issue | Solution |
+|-------|----------|
+| Blank map screen | Add valid API key to manifest/AppDelegate |
+| "For development only" watermark | Enable billing in Google Cloud Console |
+| Location not working | Grant location permissions at runtime |
+| iOS build fails | Ensure iOS deployment target is 14.0+ |
 
 ---
 
