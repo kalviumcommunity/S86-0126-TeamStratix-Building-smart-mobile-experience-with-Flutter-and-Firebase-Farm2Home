@@ -40,9 +40,10 @@ dependencies:
   firebase_auth: ^5.0.0
   cloud_firestore: ^5.0.0
   
-  # Google Maps
+  # Google Maps & Location Services
   google_maps_flutter: ^2.5.0
   location: ^5.0.0
+  geolocator: ^10.1.0
 
 dev_dependencies:
   flutter_test:
