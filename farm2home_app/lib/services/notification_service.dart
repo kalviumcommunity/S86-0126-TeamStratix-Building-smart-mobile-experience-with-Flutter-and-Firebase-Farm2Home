@@ -41,7 +41,7 @@ class NotificationService {
       StreamController<String>.broadcast();
 
   String? _cachedToken;
-  List<NotificationMessage> _messageHistory = [];
+  final List<NotificationMessage> _messageHistory = [];
 
   NotificationService._internal();
 

@@ -153,7 +153,7 @@ class _SecureProfileScreenState extends State<SecureProfileScreen>
           _showAttemptedRead = true;
           _unauthorizedAttemptError = _extractFirebaseError(e.toString());
           _errorMessage = null;
-          _successMessage = 'Firestore Rule Enforced: ${_unauthorizedAttemptError}';
+          _successMessage = 'Firestore Rule Enforced: $_unauthorizedAttemptError';
         });
       }
     }
@@ -190,7 +190,7 @@ class _SecureProfileScreenState extends State<SecureProfileScreen>
         setState(() {
           _isLoading = false;
           _errorMessage = _extractFirebaseError(e.toString());
-          _successMessage = 'Firestore Rule Enforced: ${_errorMessage}';
+          _successMessage = 'Firestore Rule Enforced: $_errorMessage';
         });
       }
     }

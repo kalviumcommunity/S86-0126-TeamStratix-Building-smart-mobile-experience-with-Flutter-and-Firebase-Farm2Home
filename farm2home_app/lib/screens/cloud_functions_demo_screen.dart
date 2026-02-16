@@ -20,7 +20,7 @@ class _CloudFunctionsDemoScreenState extends State<CloudFunctionsDemoScreen> {
   bool _isLoading = false;
   String? _lastResponse;
   String? _errorMessage;
-  List<String> _callHistory = [];
+  final List<String> _callHistory = [];
 
   @override
   void dispose() {
