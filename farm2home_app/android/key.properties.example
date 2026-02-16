@@ -1,0 +1,15 @@
+# This file stores the signing configuration for release builds.
+# IMPORTANT: DO NOT commit this file to git! Keep it local only.
+# Copy this to key.properties and fill in your actual values.
+
+# Keystore password (the password you use to protect the keystore file)
+storePassword=YOUR_KEYSTORE_PASSWORD
+
+# Key password (password for the individual key entry)
+keyPassword=YOUR_KEY_PASSWORD
+
+# Key alias (the name you gave to your key, usually "upload")
+keyAlias=upload
+
+# Path to the keystore file relative to this file
+storeFile=app-release-key.jks
