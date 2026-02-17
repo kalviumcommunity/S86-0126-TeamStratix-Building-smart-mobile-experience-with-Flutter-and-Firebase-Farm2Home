@@ -1,0 +1,46 @@
+{
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "farm2home-59d16",
+          "appId": "1:795536206416:android:b10c5908099fbec21eff55",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "farm2home-59d16",
+          "configurations": {
+            "android": "1:795536206416:android:b10c5908099fbec21eff55",
+            "ios": "1:795536206416:ios:d76baac9af13ab331eff55",
+            "macos": "1:795536206416:ios:d76baac9af13ab331eff55",
+            "web": "1:795536206416:web:7d568f72d0cacf511eff55",
+            "windows": "1:795536206416:web:6a05047f989105491eff55"
+          }
+        }
+      }
+    }
+  }
+}

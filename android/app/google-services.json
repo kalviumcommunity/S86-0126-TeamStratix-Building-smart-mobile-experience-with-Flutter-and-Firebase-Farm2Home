@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "795536206416",
+    "project_id": "farm2home-59d16",
+    "storage_bucket": "farm2home-59d16.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795536206416:android:f72507ab60f756131eff55",
+        "android_client_info": {
+          "package_name": "com.example.farm2home_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "795536206416-lpuhshpkkv74jvm7i99rvsvg9m4if5c9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjzlDaxpZ2vis22KZZlntcyPcTt-HBU98"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "795536206416-lpuhshpkkv74jvm7i99rvsvg9m4if5c9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "795536206416-29md6dvr1pto3apo6kbnjqjhfjtmcukq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.farm2homeApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795536206416:android:b10c5908099fbec21eff55",
+        "android_client_info": {
+          "package_name": "com.example.farm2home_demo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "795536206416-lpuhshpkkv74jvm7i99rvsvg9m4if5c9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjzlDaxpZ2vis22KZZlntcyPcTt-HBU98"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "795536206416-lpuhshpkkv74jvm7i99rvsvg9m4if5c9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "795536206416-29md6dvr1pto3apo6kbnjqjhfjtmcukq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.farm2homeApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

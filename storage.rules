@@ -1,0 +1,39 @@
+rules_version = '2';
+
+// Firebase Storage Rules
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Products folder - Only authenticated users can upload
+    match /products/{farmerId}/{fileName} {
+      // Allow read to everyone (public access for product images)
+      allow read: if true;
+      
+      // Allow write only to authenticated users uploading to their own folder
+      allow write: if request.auth != null && request.auth.uid == farmerId;
+      
+      // Allow delete only by the owner
+      allow delete: if request.auth != null && request.auth.uid == farmerId;
+    }
+    
+    // General products folder (if no farmer ID)
+    match /products/general/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // Profile pictures
+    match /profiles/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Catch-all for other paths (deny by default)
+    match /{allPaths=**} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}

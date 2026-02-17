@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Allow read for authenticated users (needed to list farmers)
+      allow read: if isSignedIn();
+      
+      // Allow create for new users (during signup)
+      allow create: if isSignedIn() && isOwner(userId);
+      
+      // Allow update only by the user themselves
+      allow update: if isSignedIn() && isOwner(userId);
+      
+      // Deny delete
+      allow delete: if false;
+    }
+    
+    // Orders collection
+    match /orders/{orderId} {
+      // Allow read and write for all authenticated users
+      allow read, write: if isSignedIn();
+    }
+    
+    // Products collection
+    match /products/{productId} {
+      // Allow all authenticated users to read products
+      allow read: if isSignedIn();
+      
+      // Allow farmers to create and update their own products
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && resource.data.farmerId == request.auth.uid;
+    }
+    
+    // Status Updates collection
+    match /statusUpdates/{updateId} {
+      // Allow read and write for all authenticated users
+      allow read, write: if isSignedIn();
+    }
+  }
+}
