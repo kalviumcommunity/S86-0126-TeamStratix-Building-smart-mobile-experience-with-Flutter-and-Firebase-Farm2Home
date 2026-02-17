@@ -17,62 +17,6 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
   final SupplyBookingService _bookingService = SupplyBookingService();
   bool _isLoading = false;
 
-  String _getSupplyTypeDisplay(String type) {
-    switch (type) {
-      case 'pesticide':
-        return 'Pesticides';
-      case 'fertilizer':
-        return 'Fertilizers';
-      case 'hybrid_seed':
-        return 'Hybrid Seeds';
-      default:
-        return type;
-    }
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'pending':
-        return Colors.orange;
-      case 'approved':
-        return Colors.blue;
-      case 'fulfilled':
-        return Colors.green;
-      case 'cancelled':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getStatusIcon(String status) {
-    switch (status) {
-      case 'pending':
-        return Icons.hourglass_empty;
-      case 'approved':
-        return Icons.check_circle_outline;
-      case 'fulfilled':
-        return Icons.check_circle;
-      case 'cancelled':
-        return Icons.cancel_outlined;
-      default:
-        return Icons.help_outline;
-    }
-  }
-
-  Color _getUrgencyColor(String urgency) {
-    switch (urgency) {
-      case 'high':
-        return Colors.red;
-      case 'medium':
-        return Colors.orange;
-      case 'low':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
-
   Future<void> _cancelBooking(SupplyBookingModel booking) async {
     final confirmed = await showDialog<bool>(
       context: context,

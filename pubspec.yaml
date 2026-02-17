@@ -49,6 +49,7 @@ dependencies:
   intl: ^0.19.0
   flutter_rating_bar: ^4.0.1
   badges: ^3.1.2
+  fl_chart: ^0.69.0
   
   # Image
   image_picker: ^1.0.7
@@ -62,6 +63,8 @@ dependencies:
   flutter_dotenv: ^5.1.0
   http: ^1.1.0
   dio: ^5.4.0
+  csv: ^6.0.0
+  universal_html: ^2.2.4
   
   # Payment (Stripe - can be replaced with other gateways)
   flutter_stripe: ^11.1.0

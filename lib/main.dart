@@ -49,7 +49,17 @@ import 'screens/farmer/add_product_screen.dart';
 import 'screens/farmer/my_products_screen.dart';
 import 'screens/farmer/book_supplies_screen.dart';
 import 'screens/farmer/my_bookings_screen.dart';
-import 'screens/farmer/book_soil_testing_screen.dart';
+import 'screens/farmer/enhanced_soil_testing_screen.dart';
+import 'screens/farmer/ask_agronomist_screen.dart';
+import 'screens/farmer/agro_store_screen.dart';
+import 'screens/farmer/equipment_rental_screen.dart';
+import 'screens/farmer/weather_alerts_screen.dart';
+import 'screens/farmer/disease_detection_screen.dart';
+import 'screens/farmer/farm_log_screen.dart';
+import 'screens/farmer/marketplace_screen.dart';
+import 'screens/farmer/government_schemes_screen.dart';
+import 'screens/farmer/irrigation_scheduler_screen.dart';
+import 'screens/farmer/farm_community_screen.dart';
 
 // Screens - Admin
 import 'screens/admin/cleanup_products_screen.dart';
@@ -229,7 +239,67 @@ class MyApp extends StatelessWidget {
             case '/book-soil-testing':
               return MaterialPageRoute(
                 builder: (_) => const FarmerOnlyWrapper(
-                  child: BookSoilTestingScreen(),
+                  child: EnhancedSoilTestingScreen(),
+                ),
+              );
+            case '/ask-agronomist':
+              return MaterialPageRoute(
+                builder: (_) => const FarmerOnlyWrapper(
+                  child: AskAgronomiScreen(),
+                ),
+              );
+            case '/agro-store':
+              return MaterialPageRoute(
+                builder: (_) => const FarmerOnlyWrapper(
+                  child: AgroStoreScreen(),
+                ),
+              );
+            case '/equipment-rental':
+              return MaterialPageRoute(
+                builder: (_) => const FarmerOnlyWrapper(
+                  child: EquipmentRentalScreen(),
+                ),
+              );
+            case '/weather-alerts':
+              return MaterialPageRoute(
+                builder: (_) => const FarmerOnlyWrapper(
+                  child: WeatherAlertsScreen(),
+                ),
+              );
+            case '/disease-detection':
+              return MaterialPageRoute(
+                builder: (_) => const FarmerOnlyWrapper(
+                  child: DiseaseDetectionScreen(),
+                ),
+              );
+            case '/farm-log':
+              return MaterialPageRoute(
+                builder: (_) => const FarmerOnlyWrapper(
+                  child: FarmLogScreen(),
+                ),
+              );
+            case '/marketplace':
+              return MaterialPageRoute(
+                builder: (_) => const FarmerOnlyWrapper(
+                  child: MarketplaceScreen(),
+                ),
+              );
+            case '/government-schemes':
+              return MaterialPageRoute(
+                builder: (_) => const FarmerOnlyWrapper(
+                  child: GovernmentSchemesScreen(),
+                ),
+              );
+            case '/irrigation-scheduler':
+              return MaterialPageRoute(
+                builder: (_) => const FarmerOnlyWrapper(
+                  child: IrrigationSchedulerScreen(),
+                ),
+              );
+            case '/farm-community':
+              return MaterialPageRoute(
+                builder: (_) => const FarmerOnlyWrapper(
+                  child: FarmCommunityScreen(),
                 ),
               );
 

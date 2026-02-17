@@ -21,7 +21,7 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this); // Changed from 2 to 3
+    _tabController = TabController(length: 3, vsync: this); // 3 tabs: Pending, All, Delivered
   }
 
   @override
@@ -44,35 +44,38 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen>
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Logo
+            // Updated Logo
             Container(
-              width: 28,
-              height: 28,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.agriculture,
-                size: 16,
-                color: Colors.green,
+              child: Center(
+                child: Icon(
+                  Icons.eco,
+                  size: 20,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             const Flexible(
               child: Text(
                 'Farm2Home',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
                   color: Colors.white,
+                  letterSpacing: 0.3,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -89,48 +92,6 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen>
               },
               tooltip: 'My Products',
               iconSize: 22,
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(right: 4),
-            child: PopupMenuButton<String>(
-              icon: const Icon(Icons.shopping_cart_outlined),
-              tooltip: 'Supply Booking',
-              onSelected: (value) {
-                Navigator.of(context).pushNamed(value);
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: '/book-supplies',
-                  child: Row(
-                    children: [
-                      Icon(Icons.add_shopping_cart, size: 18),
-                      SizedBox(width: 8),
-                      Text('Book Supplies'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: '/book-soil-testing',
-                  child: Row(
-                    children: [
-                      Icon(Icons.science, size: 18),
-                      SizedBox(width: 8),
-                      Text('Soil Testing'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: '/my-bookings',
-                  child: Row(
-                    children: [
-                      Icon(Icons.receipt_long, size: 18),
-                      SizedBox(width: 8),
-                      Text('My Bookings'),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ),
           Container(
@@ -162,6 +123,7 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen>
           ],
         ),
       ),
+      drawer: _buildServicesDrawer(context),
       body: Column(
         children: [
           // Header Card  
@@ -408,6 +370,212 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen>
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildServicesDrawer(BuildContext context) {
+    return Drawer(
+      child: Column(
+        children: [
+          // Drawer Header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor,
+                  Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.eco,
+                      size: 28,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Services',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Explore all features',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Drawer Items
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: [
+                _buildDrawerItem(
+                  context,
+                  Icons.add_shopping_cart,
+                  'Book Supplies',
+                  '/book-supplies',
+                ),
+                _buildDrawerItem(
+                  context,
+                  Icons.receipt_long,
+                  'My Bookings',
+                  '/my-bookings',
+                ),
+                const Divider(height: 8, thickness: 0.5),
+                _buildDrawerSectionTitle(context, 'Expert Services'),
+                _buildDrawerItem(
+                  context,
+                  Icons.person_outline,
+                  'Ask Agronomist',
+                  '/ask-agronomist',
+                ),
+                _buildDrawerItem(
+                  context,
+                  Icons.storefront_outlined,
+                  'Agro Store',
+                  '/agro-store',
+                ),
+                _buildDrawerItem(
+                  context,
+                  Icons.construction_outlined,
+                  'Equipment Rental',
+                  '/equipment-rental',
+                ),
+                const Divider(height: 8, thickness: 0.5),
+                _buildDrawerSectionTitle(context, 'Farm Management'),
+                _buildDrawerItem(
+                  context,
+                  Icons.cloud,
+                  'Weather Alerts',
+                  '/weather-alerts',
+                ),
+                _buildDrawerItem(
+                  context,
+                  Icons.health_and_safety_outlined,
+                  'Disease Detection',
+                  '/disease-detection',
+                ),
+                _buildDrawerItem(
+                  context,
+                  Icons.book_outlined,
+                  'Farm Log',
+                  '/farm-log',
+                ),
+                _buildDrawerItem(
+                  context,
+                  Icons.water_drop_outlined,
+                  'Irrigation Plan',
+                  '/irrigation-scheduler',
+                ),
+                _buildDrawerItem(
+                  context,
+                  Icons.science_outlined,
+                  'Book Soil Testing',
+                  '/book-soil-testing',
+                ),
+                const Divider(height: 8, thickness: 0.5),
+                _buildDrawerSectionTitle(context, 'Marketplace & Community'),
+                _buildDrawerItem(
+                  context,
+                  Icons.local_offer_outlined,
+                  'Marketplace',
+                  '/marketplace',
+                ),
+                _buildDrawerItem(
+                  context,
+                  Icons.assignment_outlined,
+                  'Government Schemes',
+                  '/government-schemes',
+                ),
+                _buildDrawerItem(
+                  context,
+                  Icons.forum_outlined,
+                  'Farmers Hub',
+                  '/farm-community',
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String route,
+  ) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          leading: Icon(
+            icon,
+            size: 22,
+            color: Theme.of(context).primaryColor,
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          onTap: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pushNamed(route);
+          },
+          hoverColor: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerSectionTitle(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 12, 16, 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: Theme.of(context).primaryColor,
+          letterSpacing: 0.5,
+        ),
       ),
     );
   }

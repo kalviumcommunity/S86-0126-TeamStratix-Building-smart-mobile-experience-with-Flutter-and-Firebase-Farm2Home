@@ -24,6 +24,7 @@ class _BookSoilTestingScreenState extends State<BookSoilTestingScreen> {
 
   DateTime? _selectedDate;
   String? _selectedTimeSlot;
+  String _selectedTestType = 'Basic';
   List<String> _availableSlots = [];
   bool _isLoading = false;
   bool _isCheckingAvailability = false;
@@ -105,6 +106,7 @@ class _BookSoilTestingScreenState extends State<BookSoilTestingScreen> {
         farmLocation: _locationController.text.trim(),
         scheduledDate: _selectedDate!,
         timeSlot: _selectedTimeSlot!,
+        testType: _selectedTestType,
         status: 'pending',
         soilType: _soilTypeController.text.trim().isNotEmpty 
             ? _soilTypeController.text.trim() : null,
@@ -297,8 +299,7 @@ class _BookSoilTestingScreenState extends State<BookSoilTestingScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...SoilTestingService.availableTimeSlots.map((slot) {
-                    final isAvailable = _availableSlots.contains(slot);
+                  ..._availableSlots.map((slot) {
                     final isSelected = _selectedTimeSlot == slot;
 
                     return Padding(
@@ -306,36 +307,33 @@ class _BookSoilTestingScreenState extends State<BookSoilTestingScreen> {
                       child: Card(
                         color: isSelected
                             ? Colors.green.shade100
-                            : (isAvailable ? null : Colors.grey.shade100),
+                            : null,
                         child: ListTile(
-                          leading: Icon(
-                            isAvailable ? Icons.check_circle : Icons.cancel,
-                            color: isAvailable ? Colors.green : Colors.red,
+                          leading: const Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
                           ),
                           title: Text(
                             slot,
                             style: TextStyle(
-                              color: isAvailable ? null : Colors.grey,
                               fontWeight: isSelected ? FontWeight.bold : null,
                             ),
                           ),
-                          subtitle: Text(
-                            isAvailable ? 'Available' : 'Already booked',
+                          subtitle: const Text(
+                            'Available',
                             style: TextStyle(
-                              color: isAvailable ? Colors.green : Colors.red,
+                              color: Colors.green,
                               fontSize: 12,
                             ),
                           ),
                           trailing: isSelected 
                               ? const Icon(Icons.radio_button_checked, color: Colors.green)
                               : const Icon(Icons.radio_button_unchecked),
-                          onTap: isAvailable
-                              ? () {
-                                  setState(() {
-                                    _selectedTimeSlot = slot;
-                                  });
-                                }
-                              : null,
+                          onTap: () {
+                            setState(() {
+                              _selectedTimeSlot = slot;
+                            });
+                          },
                         ),
                       ),
                     );
