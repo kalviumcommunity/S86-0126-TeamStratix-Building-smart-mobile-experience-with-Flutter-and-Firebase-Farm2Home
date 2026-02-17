@@ -92,6 +92,48 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen>
             ),
           ),
           Container(
+            margin: const EdgeInsets.only(right: 4),
+            child: PopupMenuButton<String>(
+              icon: const Icon(Icons.shopping_cart_outlined),
+              tooltip: 'Supply Booking',
+              onSelected: (value) {
+                Navigator.of(context).pushNamed(value);
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: '/book-supplies',
+                  child: Row(
+                    children: [
+                      Icon(Icons.add_shopping_cart, size: 18),
+                      SizedBox(width: 8),
+                      Text('Book Supplies'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: '/book-soil-testing',
+                  child: Row(
+                    children: [
+                      Icon(Icons.science, size: 18),
+                      SizedBox(width: 8),
+                      Text('Soil Testing'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: '/my-bookings',
+                  child: Row(
+                    children: [
+                      Icon(Icons.receipt_long, size: 18),
+                      SizedBox(width: 8),
+                      Text('My Bookings'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
             margin: const EdgeInsets.only(right: 8),
             child: IconButton(
               icon: const Icon(Icons.person),

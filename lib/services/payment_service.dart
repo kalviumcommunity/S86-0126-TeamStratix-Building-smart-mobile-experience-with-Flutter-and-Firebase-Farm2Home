@@ -38,9 +38,9 @@ class PaymentService {
   }) async {
     final updates = <String, dynamic>{
       'status': status,
-      if (transactionId != null) 'transactionId': transactionId,
-      if (status == 'completed') 'completedAt': FieldValue.serverTimestamp(),
-      if (metadata != null) ...metadata,
+      ...?transactionId != null ? {'transactionId': transactionId} : null,
+      ...?status == 'completed' ? {'completedAt': FieldValue.serverTimestamp()} : null,
+      ...?metadata,
     };
 
     await _firestore.collection('payments').doc(paymentId).update(updates);

@@ -271,23 +271,6 @@ class _AddSampleProductsScreenState extends State<AddSampleProductsScreen> {
           },
         },
         {
-          'name': 'Organic Carrots',
-          'description': 'Sweet orange carrots, rich in beta-carotene',
-          'price': 2.49,
-          'unit': 'kg',
-          'category': 'Vegetables',
-          'imageUrl':
-              'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400&q=80',
-          'ingredients': 'Organic Carrots',
-          'nutritionInfo': {
-            'calories': '41 per 100g',
-            'protein': '0.9g',
-            'carbs': '10g',
-            'fiber': '2.8g',
-            'vitamins': 'Vitamin A, K1, B6',
-          },
-        },
-        {
           'name': 'Fresh Spinach',
           'description': 'Nutritious green spinach, packed with iron',
           'price': 3.49,

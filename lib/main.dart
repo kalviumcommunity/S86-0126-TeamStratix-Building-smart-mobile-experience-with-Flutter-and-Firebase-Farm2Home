@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Firebase Options
 import 'firebase_options.dart';
@@ -46,6 +47,9 @@ import 'screens/farmer/farmer_home_screen.dart';
 import 'screens/farmer/update_order_status_screen.dart';
 import 'screens/farmer/add_product_screen.dart';
 import 'screens/farmer/my_products_screen.dart';
+import 'screens/farmer/book_supplies_screen.dart';
+import 'screens/farmer/my_bookings_screen.dart';
+import 'screens/farmer/book_soil_testing_screen.dart';
 
 // Screens - Admin
 import 'screens/admin/cleanup_products_screen.dart';
@@ -53,6 +57,13 @@ import 'screens/admin/admin_dashboard_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint('Warning: .env file not found or failed to load: $e');
+  }
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -201,6 +212,24 @@ class MyApp extends StatelessWidget {
               return MaterialPageRoute(
                 builder: (_) => FarmerOnlyWrapper(
                   child: UpdateOrderStatusScreen(orderId: orderId),
+                ),
+              );
+            case '/book-supplies':
+              return MaterialPageRoute(
+                builder: (_) => const FarmerOnlyWrapper(
+                  child: BookSuppliesScreen(),
+                ),
+              );
+            case '/my-bookings':
+              return MaterialPageRoute(
+                builder: (_) => const FarmerOnlyWrapper(
+                  child: MyBookingsScreen(),
+                ),
+              );
+            case '/book-soil-testing':
+              return MaterialPageRoute(
+                builder: (_) => const FarmerOnlyWrapper(
+                  child: BookSoilTestingScreen(),
                 ),
               );
 

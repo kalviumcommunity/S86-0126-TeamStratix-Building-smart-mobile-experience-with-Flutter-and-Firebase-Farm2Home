@@ -53,11 +53,15 @@ dependencies:
   # Image
   image_picker: ^1.0.7
   cached_network_image: ^3.3.1
+  cloudinary_public: ^0.21.0
   
   # Utilities
   shared_preferences: ^2.3.2
   uuid: ^4.5.1
   url_launcher: ^6.3.1
+  flutter_dotenv: ^5.1.0
+  http: ^1.1.0
+  dio: ^5.4.0
   
   # Payment (Stripe - can be replaced with other gateways)
   flutter_stripe: ^11.1.0
@@ -88,7 +92,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+    - .env
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

@@ -47,5 +47,37 @@ service cloud.firestore {
       // Allow read and write for all authenticated users
       allow read, write: if isSignedIn();
     }
+    
+    // Supply Bookings collection
+    match /supply_bookings/{bookingId} {
+      // Allow farmers to read and create their own bookings
+      allow read, write: if isSignedIn() && resource.data.farmerId == request.auth.uid;
+      // Allow creating new bookings
+      allow create: if isSignedIn();
+      // Allow admins to read all bookings (add admin check if needed)
+      allow read: if isSignedIn();
+    }
+    
+    // Soil Testing Slots collection
+    match /soil_testing_slots/{slotId} {
+      // Allow farmers to read and create their own slots
+      allow read, write: if isSignedIn() && resource.data.farmerId == request.auth.uid;
+      // Allow creating new slots
+      allow create: if isSignedIn();
+      // Allow admins and staff to read all slots
+      allow read: if isSignedIn();
+    }
+    
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read, write: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn();
+    }
+    
+    // Ratings collection  
+    match /ratings/{ratingId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn();
+    }
   }
 }

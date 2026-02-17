@@ -10,9 +10,12 @@ class ProductModel {
   final String category;
   final String farmerId;
   final String farmerName;
-  final String? imageUrl;
+  final List<String> imageUrls; // Multiple image URLs from Cloudinary
+  final List<String> cloudinaryPublicIds; // Public IDs for Cloudinary management
+  final String? imageUrl; // Keep for backward compatibility
   final bool isAvailable;
   final DateTime createdAt;
+  final DateTime? updatedAt;
 
   ProductModel({
     required this.productId,
@@ -23,10 +26,22 @@ class ProductModel {
     required this.category,
     required this.farmerId,
     required this.farmerName,
-    this.imageUrl,
+    this.imageUrls = const [],
+    this.cloudinaryPublicIds = const [],
+    this.imageUrl, // Backward compatibility
     this.isAvailable = true,
     required this.createdAt,
+    this.updatedAt,
   });
+
+  // Get primary image URL (first image or fallback to imageUrl)
+  String? get primaryImageUrl {
+    if (imageUrls.isNotEmpty) return imageUrls.first;
+    return imageUrl;
+  }
+
+  // Check if product has images
+  bool get hasImages => imageUrls.isNotEmpty || imageUrl != null;
 
   // Convert ProductModel to Map for Firestore
   Map<String, dynamic> toMap() {
@@ -39,9 +54,12 @@ class ProductModel {
       'category': category,
       'farmerId': farmerId,
       'farmerName': farmerName,
-      'imageUrl': imageUrl,
+      'imageUrls': imageUrls,
+      'cloudinaryPublicIds': cloudinaryPublicIds,
+      'imageUrl': imageUrl, // Keep for backward compatibility
       'isAvailable': isAvailable,
       'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
     };
   }
 
@@ -56,9 +74,12 @@ class ProductModel {
       category: map['category'] ?? 'Other',
       farmerId: map['farmerId'] ?? '',
       farmerName: map['farmerName'] ?? '',
-      imageUrl: map['imageUrl'],
+      imageUrls: List<String>.from(map['imageUrls'] ?? []),
+      cloudinaryPublicIds: List<String>.from(map['cloudinaryPublicIds'] ?? []),
+      imageUrl: map['imageUrl'], // Backward compatibility
       isAvailable: map['isAvailable'] ?? true,
       createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (map['updatedAt'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -78,9 +99,12 @@ class ProductModel {
     String? category,
     String? farmerId,
     String? farmerName,
+    List<String>? imageUrls,
+    List<String>? cloudinaryPublicIds,
     String? imageUrl,
     bool? isAvailable,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return ProductModel(
       productId: productId ?? this.productId,
@@ -91,9 +115,12 @@ class ProductModel {
       category: category ?? this.category,
       farmerId: farmerId ?? this.farmerId,
       farmerName: farmerName ?? this.farmerName,
+      imageUrls: imageUrls ?? this.imageUrls,
+      cloudinaryPublicIds: cloudinaryPublicIds ?? this.cloudinaryPublicIds,
       imageUrl: imageUrl ?? this.imageUrl,
       isAvailable: isAvailable ?? this.isAvailable,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }
