@@ -52,15 +52,13 @@ class ExpertConsultation {
       preferredTime: data['preferredTime'] ?? '',
       assignedExpertId: data['assignedExpertId'],
       assignedExpertName: data['assignedExpertName'],
-      scheduledTime: (data['scheduledTime'] as Timestamp).toDate(),
+      scheduledTime: (data['scheduledTime'] as Timestamp?)?.toDate() ?? DateTime.now(),
       status: data['status'] ?? 'pending',
       fertiliserSuggestion: data['fertiliserSuggestion'],
       weatherAdvice: data['weatherAdvice'],
       generalAdvice: data['generalAdvice'],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      completedAt: data['completedAt'] != null 
-          ? (data['completedAt'] as Timestamp).toDate() 
-          : null,
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -83,5 +81,45 @@ class ExpertConsultation {
       'createdAt': Timestamp.fromDate(createdAt),
       'completedAt': completedAt != null ? Timestamp.fromDate(completedAt!) : null,
     };
+  }
+
+  ExpertConsultation copyWith({
+    String? consultationId,
+    String? farmerId,
+    String? farmerName,
+    String? cropName,
+    String? problemDescription,
+    String? photoUrl,
+    String? consultationType,
+    String? preferredTime,
+    String? assignedExpertId,
+    String? assignedExpertName,
+    DateTime? scheduledTime,
+    String? status,
+    String? fertiliserSuggestion,
+    String? weatherAdvice,
+    String? generalAdvice,
+    DateTime? createdAt,
+    DateTime? completedAt,
+  }) {
+    return ExpertConsultation(
+      consultationId: consultationId ?? this.consultationId,
+      farmerId: farmerId ?? this.farmerId,
+      farmerName: farmerName ?? this.farmerName,
+      cropName: cropName ?? this.cropName,
+      problemDescription: problemDescription ?? this.problemDescription,
+      photoUrl: photoUrl ?? this.photoUrl,
+      consultationType: consultationType ?? this.consultationType,
+      preferredTime: preferredTime ?? this.preferredTime,
+      assignedExpertId: assignedExpertId ?? this.assignedExpertId,
+      assignedExpertName: assignedExpertName ?? this.assignedExpertName,
+      scheduledTime: scheduledTime ?? this.scheduledTime,
+      status: status ?? this.status,
+      fertiliserSuggestion: fertiliserSuggestion ?? this.fertiliserSuggestion,
+      weatherAdvice: weatherAdvice ?? this.weatherAdvice,
+      generalAdvice: generalAdvice ?? this.generalAdvice,
+      createdAt: createdAt ?? this.createdAt,
+      completedAt: completedAt ?? this.completedAt,
+    );
   }
 }

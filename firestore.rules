@@ -50,12 +50,15 @@ service cloud.firestore {
     
     // Supply Bookings collection
     match /supply_bookings/{bookingId} {
-      // Allow farmers to read and create their own bookings
-      allow read, write: if isSignedIn() && resource.data.farmerId == request.auth.uid;
-      // Allow creating new bookings
-      allow create: if isSignedIn();
-      // Allow admins to read all bookings (add admin check if needed)
+      // Allow any authenticated user to read all bookings
+      // (suppliers need to see requests to fulfill them)
       allow read: if isSignedIn();
+      
+      // Allow any authenticated user to create bookings
+      allow create: if isSignedIn();
+      
+      // Allow farmers to update/delete only their own bookings
+      allow update, delete: if isSignedIn() && resource.data.farmerId == request.auth.uid;
     }
     
     // Soil Testing Slots collection
@@ -78,6 +81,21 @@ service cloud.firestore {
     match /ratings/{ratingId} {
       allow read: if isSignedIn();
       allow create, update: if isSignedIn();
+    }
+    
+    // Expert Consultations collection
+    match /expert_consultations/{consultationId} {
+      // Allow farmers to read their own consultations
+      allow read: if isSignedIn() && resource.data.farmerId == request.auth.uid;
+      
+      // Allow farmers to create consultation requests
+      allow create: if isSignedIn();
+      
+      // Allow farmers to update their own consultations
+      allow update: if isSignedIn() && resource.data.farmerId == request.auth.uid;
+      
+      // Allow admins/experts to read and update consultations for managing them
+      allow read, update: if isSignedIn();
     }
   }
 }

@@ -72,7 +72,7 @@ class WeatherAlertsScreen extends StatelessWidget {
                   Text('7-Day Forecast', style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 12),
                   SizedBox(
-                    height: 120,
+                    height: 110,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: [
@@ -135,16 +135,18 @@ class WeatherAlertsScreen extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(right: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
+      child: Container(
+        width: 80,
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(day, style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(emoji, style: const TextStyle(fontSize: 32)),
-            const SizedBox(height: 8),
-            Text(temp, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(day, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            const SizedBox(height: 6),
+            Text(emoji, style: const TextStyle(fontSize: 28)),
+            const SizedBox(height: 6),
+            Text(temp, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
           ],
         ),
       ),

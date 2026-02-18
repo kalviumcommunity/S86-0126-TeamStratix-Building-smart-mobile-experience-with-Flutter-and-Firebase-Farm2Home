@@ -1,6 +1,6 @@
 {
-    "name": "farm2home_demo",
-    "short_name": "farm2home_demo",
+    "name": "farm2home",
+    "short_name": "farm2home",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

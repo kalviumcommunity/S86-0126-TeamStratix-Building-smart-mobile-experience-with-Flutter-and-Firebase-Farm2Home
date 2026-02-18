@@ -16,6 +16,7 @@ class _BookSoilTestingScreenState extends State<BookSoilTestingScreen> {
   final _formKey = GlobalKey<FormState>();
   final _locationController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _landAreaController = TextEditingController();
   final _soilTypeController = TextEditingController();
   final _cropHistoryController = TextEditingController();
   final _requirementsController = TextEditingController();
@@ -33,6 +34,7 @@ class _BookSoilTestingScreenState extends State<BookSoilTestingScreen> {
   void dispose() {
     _locationController.dispose();
     _phoneController.dispose();
+    _landAreaController.dispose();
     _soilTypeController.dispose();
     _cropHistoryController.dispose();
     _requirementsController.dispose();
@@ -231,14 +233,91 @@ class _BookSoilTestingScreenState extends State<BookSoilTestingScreen> {
                 },
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-              // Date Selection
+              // Soil Information Section
               Text(
-                'Select Date & Time *',
+                '2. Soil Information',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
+                  color: Colors.green.shade700,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Land Area
+              TextFormField(
+                controller: _landAreaController,
+                decoration: const InputDecoration(
+                  labelText: 'Land Area (Acres)',
+                  hintText: 'Enter your farm area in acres',
+                  prefixIcon: Icon(Icons.landscape),
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+
+              const SizedBox(height: 16),
+
+              // Soil Type
+              TextFormField(
+                controller: _soilTypeController,
+                decoration: const InputDecoration(
+                  labelText: 'Soil Type *',
+                  hintText: 'e.g., Red Soil, Clay, Sandy, Loam',
+                  prefixIcon: Icon(Icons.terrain),
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter soil type';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // Test Type Selection
+              Text(
+                '3. Appointment Details',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade700,
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // Test Type Dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedTestType,
+                decoration: const InputDecoration(
+                  labelText: 'Test Type *',
+                  prefixIcon: Icon(Icons.science),
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'Basic', child: Text('Basic - pH Level & Basic Nutrients')),
+                  DropdownMenuItem(value: 'Advanced', child: Text('Advanced - Complete Analysis')),
+                  DropdownMenuItem(value: 'Premium', child: Text('Premium - Full Report & Recommendations')),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _selectedTestType = value!;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              // Date Selection
+              Text(
+                'Date *',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                   color: Colors.grey.shade700,
                 ),
               ),
@@ -259,15 +338,34 @@ class _BookSoilTestingScreenState extends State<BookSoilTestingScreen> {
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
               // Time Slot Selection
               if (_selectedDate != null) ...[
+                Text(
+                  'Time Slot *',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                const SizedBox(height: 8),
                 if (_isCheckingAvailability)
-                  const Center(
+                  const Card(
                     child: Padding(
                       padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          SizedBox(width: 10),
+                          Text('Checking availability...'),
+                        ],
+                      ),
                     ),
                   )
                 else if (_availableSlots.isEmpty)
@@ -281,7 +379,7 @@ class _BookSoilTestingScreenState extends State<BookSoilTestingScreen> {
                           SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'No available time slots for this date. Please select another date.',
+                              'No available slots for this date. Try another date.',
                               style: TextStyle(color: Colors.red),
                             ),
                           ),
@@ -289,82 +387,57 @@ class _BookSoilTestingScreenState extends State<BookSoilTestingScreen> {
                       ),
                     ),
                   )
-                else ...[
-                  Text(
-                    'Available Time Slots',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey.shade600,
+                else
+                  Container(
+                    constraints: const BoxConstraints(maxHeight: 200),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: _availableSlots.map((slot) {
+                          final isSelected = _selectedTimeSlot == slot;
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            child: Card(
+                              color: isSelected ? Colors.green.shade100 : null,
+                              elevation: isSelected ? 2 : 1,
+                              child: ListTile(
+                                dense: true,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                leading: Icon(
+                                  isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                                  color: Colors.green,
+                                ),
+                                title: Text(
+                                  slot,
+                                  style: TextStyle(
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    _selectedTimeSlot = slot;
+                                  });
+                                },
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  ..._availableSlots.map((slot) {
-                    final isSelected = _selectedTimeSlot == slot;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Card(
-                        color: isSelected
-                            ? Colors.green.shade100
-                            : null,
-                        child: ListTile(
-                          leading: const Icon(
-                            Icons.check_circle,
-                            color: Colors.green,
-                          ),
-                          title: Text(
-                            slot,
-                            style: TextStyle(
-                              fontWeight: isSelected ? FontWeight.bold : null,
-                            ),
-                          ),
-                          subtitle: const Text(
-                            'Available',
-                            style: TextStyle(
-                              color: Colors.green,
-                              fontSize: 12,
-                            ),
-                          ),
-                          trailing: isSelected 
-                              ? const Icon(Icons.radio_button_checked, color: Colors.green)
-                              : const Icon(Icons.radio_button_unchecked),
-                          onTap: () {
-                            setState(() {
-                              _selectedTimeSlot = slot;
-                            });
-                          },
-                        ),
-                      ),
-                    );
-                  }),
-                ],
               ],
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-              // Optional Fields
+              // Additional Information
               Text(
-                'Additional Information (Optional)',
+                '4. Additional Information',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade700,
+                  color: Colors.green.shade700,
                 ),
               ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _soilTypeController,
-                decoration: const InputDecoration(
-                  labelText: 'Current Soil Type',
-                  hintText: 'e.g., Clay, Sandy, Loam',
-                  prefixIcon: Icon(Icons.terrain),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
               TextFormField(
                 controller: _cropHistoryController,
@@ -382,15 +455,15 @@ class _BookSoilTestingScreenState extends State<BookSoilTestingScreen> {
               TextFormField(
                 controller: _requirementsController,
                 decoration: const InputDecoration(
-                  labelText: 'Specific Requirements',
+                  labelText: 'Notes / Comments (Optional)',
                   hintText: 'Any specific tests or concerns?',
                   prefixIcon: Icon(Icons.note),
                   border: OutlineInputBorder(),
                 ),
-                maxLines: 3,
+                maxLines: 2,
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 40),
 
               // Book Button
               CustomButton(

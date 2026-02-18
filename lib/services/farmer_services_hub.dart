@@ -16,25 +16,52 @@ class FarmerServicesHub {
   // EXPERT CONSULTATION SERVICE
   Future<void> bookConsultation(ExpertConsultation consultation) async {
     try {
-      await _firestore
+      print('Booking consultation: ${consultation.toMap()}');
+      final docRef = await _firestore
           .collection('expert_consultations')
           .add(consultation.toMap());
+      print('Consultation booked with ID: ${docRef.id}');
     } catch (e) {
+      print('Error booking consultation: $e');
       throw Exception('Failed to book consultation: $e');
     }
   }
 
   Stream<List<ExpertConsultation>> getFarmerConsultations(String farmerId) {
+    print('Getting consultations for farmer: $farmerId');
     return _firestore
         .collection('expert_consultations')
         .where('farmerId', isEqualTo: farmerId)
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => ExpertConsultation.fromFirestore(doc))
+      print('Received ${snapshot.docs.length} consultations');
+      final consultations = snapshot.docs
+          .map((doc) {
+        try {
+          return ExpertConsultation.fromFirestore(doc);
+        } catch (e) {
+          print('Error parsing consultation doc ${doc.id}: $e');
+          return null;
+        }
+      })
+          .where((consultation) => consultation != null)
+          .cast<ExpertConsultation>()
           .toList();
+      print('Successfully parsed ${consultations.length} consultations');
+      return consultations;
     });
+  }
+
+  Future<void> updateConsultation(ExpertConsultation consultation) async {
+    try {
+      await _firestore
+          .collection('expert_consultations')
+          .doc(consultation.consultationId)
+          .update(consultation.toMap());
+    } catch (e) {
+      throw Exception('Failed to update consultation: $e');
+    }
   }
 
   // AGRO STORE SERVICE
